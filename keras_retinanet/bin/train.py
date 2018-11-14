@@ -492,7 +492,7 @@ def main(args=None):
         args,
     )
 
-    if not use_tpu:
+    if not args.use_tpu:
         # start training
         training_model.fit_generator(
             generator=train_generator,
