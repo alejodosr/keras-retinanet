@@ -24,12 +24,12 @@ from . import Backbone
 from ..utils.image import preprocess_image
 
 
-class ResNetBackbone(Backbone, static_batch_size=False):
+class ResNetBackbone(Backbone):
     """ Describes backbone information and provides utility functions.
     """
 
     def __init__(self, backbone, static_batch_size=False):
-        super(ResNetBackbone, self).__init__(backbone, static_batch_size)
+        super(ResNetBackbone, self).__init__(backbone)
         self.custom_objects.update(keras_resnet.custom_objects)
         self.static_batch_size = static_batch_size
 
@@ -92,12 +92,12 @@ def resnet_retinanet(num_classes, backbone='resnet50', inputs=None, modifier=Non
     if inputs is None:
         if keras.backend.image_data_format() == 'channels_first':
             if static_batch_size:
-                inputs = keras.layers.Input(shape=(3, None, None), batch_size=128)
+                inputs = keras.layers.Input(shape=(3, None, None))
             else:
                 inputs = keras.layers.Input(shape=(3, None, None))
         else:
             if static_batch_size:
-                inputs = keras.layers.Input(shape=(None, None, 3), batch_size=128)
+                inputs = keras.layers.Input(shape=(None, None, 3))
             else:
                 inputs = keras.layers.Input(shape=(None, None, 3))
 
