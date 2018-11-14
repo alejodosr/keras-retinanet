@@ -29,7 +29,7 @@ class ResNetBackbone(Backbone, static_batch_size=False):
     """
 
     def __init__(self, backbone, static_batch_size=False):
-        super(ResNetBackbone, self).__init__(backbone)
+        super(ResNetBackbone, self).__init__(backbone, static_batch_size)
         self.custom_objects.update(keras_resnet.custom_objects)
         self.static_batch_size = static_batch_size
 
