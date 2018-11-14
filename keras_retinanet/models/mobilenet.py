@@ -23,7 +23,7 @@ from . import retinanet
 from . import Backbone
 
 
-class MobileNetBackbone(Backbone):
+class MobileNetBackbone(Backbone, static_batch_size=False):
     """ Describes backbone information and provides utility functions.
     """
 

@@ -30,7 +30,7 @@ allowed_backbones = {
 }
 
 
-class DenseNetBackbone(Backbone):
+class DenseNetBackbone(Backbone, static_batch_size=False):
     """ Describes backbone information and provides utility functions.
     """
 

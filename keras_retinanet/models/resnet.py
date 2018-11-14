@@ -24,18 +24,19 @@ from . import Backbone
 from ..utils.image import preprocess_image
 
 
-class ResNetBackbone(Backbone):
+class ResNetBackbone(Backbone, static_batch_size=False):
     """ Describes backbone information and provides utility functions.
     """
 
-    def __init__(self, backbone):
+    def __init__(self, backbone, static_batch_size=False):
         super(ResNetBackbone, self).__init__(backbone)
         self.custom_objects.update(keras_resnet.custom_objects)
+        self.static_batch_size = static_batch_size
 
     def retinanet(self, *args, **kwargs):
         """ Returns a retinanet model using the correct backbone.
         """
-        return resnet_retinanet(*args, backbone=self.backbone, **kwargs)
+        return resnet_retinanet(*args, backbone=self.backbone, static_batch_size=self.static_batch_size, **kwargs)
 
     def download_imagenet(self):
         """ Downloads ImageNet weights and returns path to weights file.
@@ -75,7 +76,7 @@ class ResNetBackbone(Backbone):
         return preprocess_image(inputs, mode='caffe')
 
 
-def resnet_retinanet(num_classes, backbone='resnet50', inputs=None, modifier=None, **kwargs):
+def resnet_retinanet(num_classes, backbone='resnet50', inputs=None, modifier=None, static_batch_size=False, **kwargs):
     """ Constructs a retinanet model using a resnet backbone.
 
     Args
@@ -90,9 +91,16 @@ def resnet_retinanet(num_classes, backbone='resnet50', inputs=None, modifier=Non
     # choose default input
     if inputs is None:
         if keras.backend.image_data_format() == 'channels_first':
-            inputs = keras.layers.Input(shape=(3, None, None))
+            if static_batch_size:
+                inputs = keras.layers.Input(shape=(3, None, None), batch_size=128)
+            else:
+                inputs = keras.layers.Input(shape=(3, None, None))
         else:
-            inputs = keras.layers.Input(shape=(None, None, 3))
+            if static_batch_size:
+                inputs = keras.layers.Input(shape=(None, None, 3), batch_size=128)
+            else:
+                inputs = keras.layers.Input(shape=(None, None, 3))
+
 
     # create the resnet backbone
     if backbone == 'resnet50':

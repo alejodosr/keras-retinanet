@@ -23,7 +23,7 @@ from . import Backbone
 from ..utils.image import preprocess_image
 
 
-class VGGBackbone(Backbone):
+class VGGBackbone(Backbone, static_batch_size=False):
     """ Describes backbone information and provides utility functions.
     """
 
