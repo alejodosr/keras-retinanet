@@ -14,7 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import keras
+import tensorflow as tf
+from tensorflow.python import keras as keras
 from .. import initializers
 from .. import layers
 from ..utils.anchors import AnchorParameters
@@ -54,12 +55,12 @@ def default_classification_model(
         if not use_tpu:
             inputs = keras.layers.Input(shape=(pyramid_feature_size, width, height))
         else:
-            inputs = keras.layers.Input(shape=(pyramid_feature_size, width, height), batch_shape=(128, pyramid_feature_size, width, height))
+            inputs = keras.layers.Input(batch_shape=(128, pyramid_feature_size, width, height))
     else:
         if not use_tpu:
             inputs = keras.layers.Input(shape=(width, height, pyramid_feature_size))
         else:
-            inputs = keras.layers.Input(shape=(width, height, pyramid_feature_size), batch_shape=(128, width, height, pyramid_feature_size))
+            inputs = keras.layers.Input(batch_shape=(128, width, height, pyramid_feature_size))
     outputs = inputs
     for i in range(4):
         outputs = keras.layers.Conv2D(
@@ -116,12 +117,12 @@ def default_regression_model(num_values, num_anchors, width, height, pyramid_fea
         if not use_tpu:
             inputs  = keras.layers.Input(shape=(pyramid_feature_size, width, height))
         else:
-            inputs = keras.layers.Input(shape=(pyramid_feature_size, width, height), batch_shape=(128, pyramid_feature_size, width, height))
+            inputs = keras.layers.Input(batch_shape=(128, pyramid_feature_size, width, height))
     else:
         if not use_tpu:
             inputs  = keras.layers.Input(shape=(width, height, pyramid_feature_size))
         else:
-            inputs = keras.layers.Input(shape=(width, height, pyramid_feature_size), batch_shape=(128, width, height, pyramid_feature_size))
+            inputs = keras.layers.Input(batch_shape=(128, width, height, pyramid_feature_size))
     outputs = inputs
     for i in range(4):
         outputs = keras.layers.Conv2D(

@@ -15,7 +15,8 @@ limitations under the License.
 """
 
 import numpy as np
-import keras
+import tensorflow as tf
+from tensorflow.python import keras as keras
 
 from ..utils.compute_overlap import compute_overlap
 

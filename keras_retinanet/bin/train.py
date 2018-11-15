@@ -21,9 +21,8 @@ import os
 import sys
 import warnings
 
-import keras
-import keras.preprocessing.image
 import tensorflow as tf
+from tensorflow.python import keras as keras
 
 # Allow relative imports when being executed as script.
 if __name__ == "__main__" and __package__ is None:
@@ -77,7 +76,8 @@ def model_with_weights(model, weights, skip_mismatch):
         skip_mismatch : If True, skips layers whose shape of weights doesn't match with the model.
     """
     if weights is not None:
-        model.load_weights(weights, by_name=True, skip_mismatch=skip_mismatch)
+        # model.load_weights(weights, by_name=True, skip_mismatch=skip_mismatch)
+        model.load_weights(weights, by_name=True)
     return model
 
 
@@ -450,7 +450,7 @@ def main(args=None):
     # optionally choose specific GPU
     if args.gpu:
         os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
-    keras.backend.tensorflow_backend.set_session(get_session())
+    keras.backend.set_session(get_session())
 
     # optionally load config parameters
     if args.config:
@@ -524,15 +524,15 @@ def main(args=None):
                 tf.contrib.cluster_resolver.TPUClusterResolver(TPU_WORKER)))
 
         # start training
-        # tpu_model.fit_generator(
-        #     generator=train_generator,
-        #     steps_per_epoch=args.steps,
-        #     epochs=args.epochs,
-        #     verbose=1,
-        #     callbacks=callbacks,
-        #     initial_epoch=args.initial_epoch,
-        #     batch_size=128 * 8,
-        # )
+        tpu_model.fit_generator(
+            generator=train_generator,
+            steps_per_epoch=args.steps,
+            epochs=args.epochs,
+            verbose=1,
+            callbacks=callbacks,
+            initial_epoch=args.initial_epoch,
+            batch_size=128 * 8,
+        )
 
 
 if __name__ == '__main__':

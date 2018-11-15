@@ -15,7 +15,8 @@ limitations under the License.
 """
 
 from __future__ import division
-import keras
+import tensorflow as tf
+from tensorflow.python import keras as keras
 import numpy as np
 import cv2
 from PIL import Image

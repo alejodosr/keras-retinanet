@@ -19,7 +19,8 @@ import random
 import threading
 import warnings
 
-import keras
+import tensorflow as tf
+from tensorflow.python import keras as keras
 
 from ..utils.anchors import (
     anchor_targets_bbox,

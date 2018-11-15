@@ -14,7 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import keras
+import tensorflow as tf
+from tensorflow.python import keras as keras
 from ..utils.eval import evaluate
 
 

@@ -14,7 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import keras
+import tensorflow as tf
+from tensorflow.python import keras as keras
+from tensorflow.python.framework.constant_op import constant
 
 import numpy as np
 import math
@@ -32,8 +34,9 @@ class PriorProbability(keras.initializers.Initializer):
             'probability': self.probability
         }
 
-    def __call__(self, shape, dtype=None):
+    def __call__(self, shape, dtype=None, partition_info=None):
         # set bias to -log((1 - p)/p) for foreground
-        result = np.ones(shape, dtype=dtype) * -math.log((1 - self.probability) / self.probability)
+        # result = np.ones(shape, dtype=dtype) * -math.log((1 - self.probability) / self.probability)
+        result = constant(1, dtype=dtype, shape=shape) * -math.log((1 - self.probability) / self.probability)
 
         return result
