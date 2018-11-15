@@ -531,7 +531,6 @@ def main(args=None):
             verbose=1,
             callbacks=callbacks,
             initial_epoch=args.initial_epoch,
-            batch_size=128 * 8,
         )
 
 
