@@ -524,7 +524,7 @@ def main(args=None):
                 tf.contrib.cluster_resolver.TPUClusterResolver(TPU_WORKER)))
 
         # start training
-        training_model.fit_generator(
+        tpu_model.fit_generator(
             generator=train_generator,
             steps_per_epoch=args.steps,
             epochs=args.epochs,
