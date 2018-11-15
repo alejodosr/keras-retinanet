@@ -191,17 +191,28 @@ def default_submodels(num_classes, num_anchors, use_tpu = False):
     Returns
         A list of tuple, where the first element is the name of the submodel and the second element is the submodel itself.
     """
+    p3_witdth = 100
+    p3_height = 134
+    p4_witdth = 50
+    p4_height = 67
+    p5_witdth = 25
+    p5_height = 34
+    p6_witdth = 13
+    p6_height = 17
+    p7_witdth = 7
+    p7_height = 9
+
     return [
-        ('regression_' + str(80) + '_' + str(60), default_regression_model(4, num_anchors, 80, 60, use_tpu=use_tpu)),
-        ('classification_' + str(80) + '_' + str(60), default_classification_model(num_classes, num_anchors, 80, 60, use_tpu=use_tpu)),
-        ('regression_' + str(40) + '_' + str(30), default_regression_model(4, num_anchors, 40, 30, use_tpu=use_tpu)),
-        ('classification_' + str(40) + '_' + str(30), default_classification_model(num_classes, num_anchors, 40, 30, use_tpu=use_tpu)),
-        ('regression_' + str(20) + '_' + str(15), default_regression_model(4, num_anchors, 20, 15, use_tpu=use_tpu)),
-        ('classification_' + str(20) + '_' + str(15), default_classification_model(num_classes, num_anchors, 20, 15, use_tpu=use_tpu)),
-        ('regression_' + str(10) + '_' + str(8), default_regression_model(4, num_anchors, 10, 8, use_tpu=use_tpu)),
-        ('classification_' + str(10) + '_' + str(8), default_classification_model(num_classes, num_anchors, 10, 8, use_tpu=use_tpu)),
-        ('regression_' + str(5) + '_' + str(4), default_regression_model(4, num_anchors, 5, 4, use_tpu=use_tpu)),
-        ('classification_' + str(5) + '_' + str(4), default_classification_model(num_classes, num_anchors, 5, 4, use_tpu=use_tpu))
+        ('regression_' + str(p3_witdth) + '_' + str(p3_height), default_regression_model(4, num_anchors, p3_witdth, p3_height, use_tpu=use_tpu)),
+        ('classification_' + str(p3_witdth) + '_' + str(p3_height), default_classification_model(num_classes, num_anchors, p3_witdth, p3_height, use_tpu=use_tpu)),
+        ('regression_' + str(p4_witdth) + '_' + str(p4_height), default_regression_model(4, num_anchors, p4_witdth, p4_height, use_tpu=use_tpu)),
+        ('classification_' + str(p4_witdth) + '_' + str(p4_height), default_classification_model(num_classes, num_anchors, p4_witdth, p4_height, use_tpu=use_tpu)),
+        ('regression_' + str(p5_witdth) + '_' + str(p5_height), default_regression_model(4, num_anchors, p5_witdth, p5_height, use_tpu=use_tpu)),
+        ('classification_' + str(p5_witdth) + '_' + str(p5_height), default_classification_model(num_classes, num_anchors, p5_witdth, p5_height, use_tpu=use_tpu)),
+        ('regression_' + str(p6_witdth) + '_' + str(p6_height), default_regression_model(4, num_anchors, p6_witdth, p6_height, use_tpu=use_tpu)),
+        ('classification_' + str(p6_witdth) + '_' + str(p6_height), default_classification_model(num_classes, num_anchors, p6_witdth, p6_height, use_tpu=use_tpu)),
+        ('regression_' + str(p7_witdth) + '_' + str(p7_height), default_regression_model(4, num_anchors, p7_witdth, p7_height, use_tpu=use_tpu)),
+        ('classification_' + str(p7_witdth) + '_' + str(p7_height), default_classification_model(num_classes, num_anchors, p7_witdth, p7_height, use_tpu=use_tpu))
     ]
 
 
