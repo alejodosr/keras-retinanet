@@ -133,8 +133,16 @@ def create_models(backbone_retinanet, num_classes, weights, multi_gpu=0, freeze_
     else:
         training_model.compile(
             loss={
-                'regression'    : losses.smooth_l1(),
-                'classification': losses.focal()
+                'regression_80_60'    : losses.smooth_l1(),
+                'classification_80_60': losses.focal(),
+                'regression_40_30': losses.smooth_l1(),
+                'classification_40_30': losses.focal(),
+                'regression_20_15': losses.smooth_l1(),
+                'classification_20_15': losses.focal(),
+                'regression_10_8': losses.smooth_l1(),
+                'classification_10_8': losses.focal(),
+                'regression_5_4': losses.smooth_l1(),
+                'classification_5_4': losses.focal()
             },
             optimizer=tf.train.AdamOptimizer(learning_rate=1e-5)
         )
@@ -471,7 +479,8 @@ def main(args=None):
             weights=weights,
             multi_gpu=args.multi_gpu,
             freeze_backbone=args.freeze_backbone,
-            config=args.config
+            config=args.config,
+            use_tpu=args.use_tpu,
         )
 
     # print model summary

@@ -76,7 +76,7 @@ class ResNetBackbone(Backbone):
         return preprocess_image(inputs, mode='caffe')
 
 
-def resnet_retinanet(num_classes, backbone='resnet50', inputs=None, modifier=None, static_batch_size=False, **kwargs):
+def resnet_retinanet(num_classes, backbone='resnet50', inputs=None, modifier=None, static_batch_size=False, use_tpu = False, **kwargs):
     """ Constructs a retinanet model using a resnet backbone.
 
     Args
@@ -117,7 +117,7 @@ def resnet_retinanet(num_classes, backbone='resnet50', inputs=None, modifier=Non
         resnet = modifier(resnet)
 
     # create the full model
-    return retinanet.retinanet(inputs=inputs, num_classes=num_classes, backbone_layers=resnet.outputs[1:], **kwargs)
+    return retinanet.retinanet(inputs=inputs, num_classes=num_classes, backbone_layers=resnet.outputs[1:], use_tpu=use_tpu, **kwargs)
 
 
 def resnet50_retinanet(num_classes, inputs=None, **kwargs):

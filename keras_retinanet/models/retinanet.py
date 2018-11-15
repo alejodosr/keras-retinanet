@@ -24,10 +24,13 @@ from . import assert_training_model
 def default_classification_model(
     num_classes,
     num_anchors,
+    width,
+    height,
     pyramid_feature_size=256,
     prior_probability=0.01,
     classification_feature_size=256,
-    name='classification_submodel'
+    name='classification_submodel',
+    use_tpu = False
 ):
     """ Creates the default regression submodel.
 
@@ -48,15 +51,21 @@ def default_classification_model(
     }
 
     if keras.backend.image_data_format() == 'channels_first':
-        inputs  = keras.layers.Input(shape=(pyramid_feature_size, None, None))
+        if not use_tpu:
+            inputs = keras.layers.Input(shape=(pyramid_feature_size, width, height))
+        else:
+            inputs = keras.layers.Input(shape=(pyramid_feature_size, width, height), batch_shape=(128, pyramid_feature_size, width, height))
     else:
-        inputs  = keras.layers.Input(shape=(None, None, pyramid_feature_size))
+        if not use_tpu:
+            inputs = keras.layers.Input(shape=(width, height, pyramid_feature_size))
+        else:
+            inputs = keras.layers.Input(shape=(width, height, pyramid_feature_size), batch_shape=(128, width, height, pyramid_feature_size))
     outputs = inputs
     for i in range(4):
         outputs = keras.layers.Conv2D(
             filters=classification_feature_size,
             activation='relu',
-            name='pyramid_classification_{}'.format(i),
+            name='pyramid_classification_{}'.format(i) + '_' + str(width) + '_' + str(height),
             kernel_initializer=keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
             bias_initializer='zeros',
             **options
@@ -66,20 +75,20 @@ def default_classification_model(
         filters=num_classes * num_anchors,
         kernel_initializer=keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
         bias_initializer=initializers.PriorProbability(probability=prior_probability),
-        name='pyramid_classification',
+        name='pyramid_classification' + '_' + str(width) + '_' + str(height),
         **options
     )(outputs)
 
     # reshape output and apply sigmoid
     if keras.backend.image_data_format() == 'channels_first':
-        outputs = keras.layers.Permute((2, 3, 1), name='pyramid_classification_permute')(outputs)
-    outputs = keras.layers.Reshape((-1, num_classes), name='pyramid_classification_reshape')(outputs)
-    outputs = keras.layers.Activation('sigmoid', name='pyramid_classification_sigmoid')(outputs)
+        outputs = keras.layers.Permute((2, 3, 1), name='pyramid_classification_permute' + '_' + str(width) + '_' + str(height))(outputs)
+    outputs = keras.layers.Reshape((-1, num_classes), name='pyramid_classification_reshape' + '_' + str(width) + '_' + str(height))(outputs)
+    outputs = keras.layers.Activation('sigmoid', name='pyramid_classification_sigmoid' + '_' + str(width) + '_' + str(height))(outputs)
 
-    return keras.models.Model(inputs=inputs, outputs=outputs, name=name)
+    return keras.models.Model(inputs=inputs, outputs=outputs, name=name + '_'  + str(width) + '_' + str(height))
 
 
-def default_regression_model(num_values, num_anchors, pyramid_feature_size=256, regression_feature_size=256, name='regression_submodel'):
+def default_regression_model(num_values, num_anchors, width, height, pyramid_feature_size=256, regression_feature_size=256, name='regression_submodel', use_tpu = False):
     """ Creates the default regression submodel.
 
     Args
@@ -104,24 +113,30 @@ def default_regression_model(num_values, num_anchors, pyramid_feature_size=256, 
     }
 
     if keras.backend.image_data_format() == 'channels_first':
-        inputs  = keras.layers.Input(shape=(pyramid_feature_size, None, None))
+        if not use_tpu:
+            inputs  = keras.layers.Input(shape=(pyramid_feature_size, width, height))
+        else:
+            inputs = keras.layers.Input(shape=(pyramid_feature_size, width, height), batch_shape=(128, pyramid_feature_size, width, height))
     else:
-        inputs  = keras.layers.Input(shape=(None, None, pyramid_feature_size))
+        if not use_tpu:
+            inputs  = keras.layers.Input(shape=(width, height, pyramid_feature_size))
+        else:
+            inputs = keras.layers.Input(shape=(width, height, pyramid_feature_size), batch_shape=(128, width, height, pyramid_feature_size))
     outputs = inputs
     for i in range(4):
         outputs = keras.layers.Conv2D(
             filters=regression_feature_size,
             activation='relu',
-            name='pyramid_regression_{}'.format(i),
+            name='pyramid_regression_{}'.format(i) + '_' + str(width) + '_' + str(height),
             **options
         )(outputs)
 
-    outputs = keras.layers.Conv2D(num_anchors * num_values, name='pyramid_regression', **options)(outputs)
+    outputs = keras.layers.Conv2D(num_anchors * num_values, name='pyramid_regression' + '_' + str(width) + '_' + str(height), **options)(outputs)
     if keras.backend.image_data_format() == 'channels_first':
-        outputs = keras.layers.Permute((2, 3, 1), name='pyramid_regression_permute')(outputs)
-    outputs = keras.layers.Reshape((-1, num_values), name='pyramid_regression_reshape')(outputs)
+        outputs = keras.layers.Permute((2, 3, 1), name='pyramid_regression_permute' + '_' + str(width) + '_' + str(height))(outputs)
+    outputs = keras.layers.Reshape((-1, num_values), name='pyramid_regression_reshape' + '_' + str(width) + '_' + str(height))(outputs)
 
-    return keras.models.Model(inputs=inputs, outputs=outputs, name=name)
+    return keras.models.Model(inputs=inputs, outputs=outputs, name=name + '_' + str(width) + '_' + str(height))
 
 
 def __create_pyramid_features(C3, C4, C5, feature_size=256):
@@ -162,7 +177,7 @@ def __create_pyramid_features(C3, C4, C5, feature_size=256):
     return [P3, P4, P5, P6, P7]
 
 
-def default_submodels(num_classes, num_anchors):
+def default_submodels(num_classes, num_anchors, use_tpu = False):
     """ Create a list of default submodels used for object detection.
 
     The default submodels contains a regression submodel and a classification submodel.
@@ -175,8 +190,16 @@ def default_submodels(num_classes, num_anchors):
         A list of tuple, where the first element is the name of the submodel and the second element is the submodel itself.
     """
     return [
-        ('regression', default_regression_model(4, num_anchors)),
-        ('classification', default_classification_model(num_classes, num_anchors))
+        ('regression_' + str(80) + '_' + str(60), default_regression_model(4, num_anchors, 80, 60, use_tpu=use_tpu)),
+        ('classification_' + str(80) + '_' + str(60), default_classification_model(num_classes, num_anchors, 80, 60, use_tpu=use_tpu)),
+        ('regression_' + str(40) + '_' + str(30), default_regression_model(4, num_anchors, 40, 30, use_tpu=use_tpu)),
+        ('classification_' + str(40) + '_' + str(30), default_classification_model(num_classes, num_anchors, 40, 30, use_tpu=use_tpu)),
+        ('regression_' + str(20) + '_' + str(15), default_regression_model(4, num_anchors, 20, 15, use_tpu=use_tpu)),
+        ('classification_' + str(20) + '_' + str(15), default_classification_model(num_classes, num_anchors, 20, 15, use_tpu=use_tpu)),
+        ('regression_' + str(10) + '_' + str(8), default_regression_model(4, num_anchors, 10, 8, use_tpu=use_tpu)),
+        ('classification_' + str(10) + '_' + str(8), default_classification_model(num_classes, num_anchors, 10, 8, use_tpu=use_tpu)),
+        ('regression_' + str(5) + '_' + str(4), default_regression_model(4, num_anchors, 5, 4, use_tpu=use_tpu)),
+        ('classification_' + str(5) + '_' + str(4), default_classification_model(num_classes, num_anchors, 5, 4, use_tpu=use_tpu))
     ]
 
 
@@ -242,7 +265,8 @@ def retinanet(
     num_anchors             = None,
     create_pyramid_features = __create_pyramid_features,
     submodels               = None,
-    name                    = 'retinanet'
+    name                    = 'retinanet',
+    use_tpu                 = False
 ):
     """ Construct a RetinaNet model on top of a backbone.
 
@@ -271,7 +295,7 @@ def retinanet(
         num_anchors = AnchorParameters.default.num_anchors()
 
     if submodels is None:
-        submodels = default_submodels(num_classes, num_anchors)
+        submodels = default_submodels(num_classes, num_anchors, use_tpu=use_tpu)
 
     C3, C4, C5 = backbone_layers
 
