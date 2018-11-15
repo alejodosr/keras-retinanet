@@ -204,14 +204,14 @@ def default_submodels(num_classes, num_anchors, use_tpu = False):
 
     return [
         ('regression_' + str(p3_witdth) + '_' + str(p3_height), default_regression_model(4, num_anchors, p3_witdth, p3_height, use_tpu=use_tpu)),
-        ('classification_' + str(p3_witdth) + '_' + str(p3_height), default_classification_model(num_classes, num_anchors, p3_witdth, p3_height, use_tpu=use_tpu)),
         ('regression_' + str(p4_witdth) + '_' + str(p4_height), default_regression_model(4, num_anchors, p4_witdth, p4_height, use_tpu=use_tpu)),
-        ('classification_' + str(p4_witdth) + '_' + str(p4_height), default_classification_model(num_classes, num_anchors, p4_witdth, p4_height, use_tpu=use_tpu)),
         ('regression_' + str(p5_witdth) + '_' + str(p5_height), default_regression_model(4, num_anchors, p5_witdth, p5_height, use_tpu=use_tpu)),
-        ('classification_' + str(p5_witdth) + '_' + str(p5_height), default_classification_model(num_classes, num_anchors, p5_witdth, p5_height, use_tpu=use_tpu)),
         ('regression_' + str(p6_witdth) + '_' + str(p6_height), default_regression_model(4, num_anchors, p6_witdth, p6_height, use_tpu=use_tpu)),
-        ('classification_' + str(p6_witdth) + '_' + str(p6_height), default_classification_model(num_classes, num_anchors, p6_witdth, p6_height, use_tpu=use_tpu)),
         ('regression_' + str(p7_witdth) + '_' + str(p7_height), default_regression_model(4, num_anchors, p7_witdth, p7_height, use_tpu=use_tpu)),
+        ('classification_' + str(p3_witdth) + '_' + str(p3_height), default_classification_model(num_classes, num_anchors, p3_witdth, p3_height, use_tpu=use_tpu)),
+        ('classification_' + str(p4_witdth) + '_' + str(p4_height), default_classification_model(num_classes, num_anchors, p4_witdth, p4_height, use_tpu=use_tpu)),
+        ('classification_' + str(p5_witdth) + '_' + str(p5_height), default_classification_model(num_classes, num_anchors, p5_witdth, p5_height, use_tpu=use_tpu)),
+        ('classification_' + str(p6_witdth) + '_' + str(p6_height), default_classification_model(num_classes, num_anchors, p6_witdth, p6_height, use_tpu=use_tpu)),
         ('classification_' + str(p7_witdth) + '_' + str(p7_height), default_classification_model(num_classes, num_anchors, p7_witdth, p7_height, use_tpu=use_tpu))
     ]
 
@@ -228,7 +228,8 @@ def __build_model_pyramid(name, model, features):
         A tensor containing the response from the submodel on the FPN features.
     """
     # return keras.layers.Concatenate(axis=1, name=name)([model(f) for f in features])
-    return model(features[0])
+    # return model(features[0])
+    return keras.layers.Concatenate(axis=1, name=name)(model)
 
 
 def __build_pyramid(models, features):
@@ -243,7 +244,9 @@ def __build_pyramid(models, features):
     """
     import math
     # return [__build_model_pyramid(n, m, features) for n, m in models]
-    return [__build_model_pyramid(val[0], val[1], [features[math.floor(idx/2)]]) for idx, val in enumerate(models)]
+    # return [__build_model_pyramid(val[0], val[1], [features[math.floor(idx/2)]]) for idx, val in enumerate(models)]
+    return [keras.layers.Concatenate(axis=1, name="regression")([models[0][1](features[0]), models[1][1](features[1]), models[2][1](features[2]), models[3][1](features[3]), models[4][1](features[4])]), \
+            keras.layers.Concatenate(axis=1, name="classification")([models[5][1](features[0]), models[6][1](features[1]), models[7][1](features[2]), models[8][1](features[3]), models[9][1](features[4])])]
 
 
 def __build_anchors(anchor_parameters, features):

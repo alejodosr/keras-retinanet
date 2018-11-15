@@ -134,29 +134,37 @@ def create_models(backbone_retinanet, num_classes, weights, multi_gpu=0, freeze_
         )
     else:
 
-        p3_witdth = 100
-        p3_height = 134
-        p4_witdth = 50
-        p4_height = 67
-        p5_witdth = 25
-        p5_height = 34
-        p6_witdth = 13
-        p6_height = 17
-        p7_witdth = 7
-        p7_height = 9
+        # p3_witdth = 100
+        # p3_height = 134
+        # p4_witdth = 50
+        # p4_height = 67
+        # p5_witdth = 25
+        # p5_height = 34
+        # p6_witdth = 13
+        # p6_height = 17
+        # p7_witdth = 7
+        # p7_height = 9
+        #
+        # training_model.compile(
+        #     loss={
+        #         'regression_submodel_' + str(p3_witdth) + '_' + str(p3_height): losses.smooth_l1(),
+        #         'classification_submodel_' + str(p3_witdth) + '_' + str(p3_height): losses.focal(),
+        #         'regression_submodel_' + str(p4_witdth) + '_' + str(p4_height): losses.smooth_l1(),
+        #         'classification_submodel_' + str(p4_witdth) + '_' + str(p4_height): losses.focal(),
+        #         'regression_submodel_' + str(p5_witdth) + '_' + str(p5_height): losses.smooth_l1(),
+        #         'classification_submodel_' + str(p5_witdth) + '_' + str(p5_height): losses.focal(),
+        #         'regression_submodel_' + str(p6_witdth) + '_' + str(p6_height): losses.smooth_l1(),
+        #         'classification_submodel_' + str(p6_witdth) + '_' + str(p6_height): losses.focal(),
+        #         'regression_submodel_' + str(p7_witdth) + '_' + str(p7_height): losses.smooth_l1(),
+        #         'classification_submodel_' + str(p7_witdth) + '_' + str(p7_height): losses.focal()
+        #     },
+        #     optimizer=tf.train.AdamOptimizer(learning_rate=1e-5)
+        # )
 
         training_model.compile(
             loss={
-                'regression_submodel_' + str(p3_witdth) + '_' + str(p3_height): losses.smooth_l1(),
-                'classification_submodel_' + str(p3_witdth) + '_' + str(p3_height): losses.focal(),
-                'regression_submodel_' + str(p4_witdth) + '_' + str(p4_height): losses.smooth_l1(),
-                'classification_submodel_' + str(p4_witdth) + '_' + str(p4_height): losses.focal(),
-                'regression_submodel_' + str(p5_witdth) + '_' + str(p5_height): losses.smooth_l1(),
-                'classification_submodel_' + str(p5_witdth) + '_' + str(p5_height): losses.focal(),
-                'regression_submodel_' + str(p6_witdth) + '_' + str(p6_height): losses.smooth_l1(),
-                'classification_submodel_' + str(p6_witdth) + '_' + str(p6_height): losses.focal(),
-                'regression_submodel_' + str(p7_witdth) + '_' + str(p7_height): losses.smooth_l1(),
-                'classification_submodel_' + str(p7_witdth) + '_' + str(p7_height): losses.focal()
+                'regression'    : losses.smooth_l1(),
+                'classification': losses.focal()
             },
             optimizer=tf.train.AdamOptimizer(learning_rate=1e-5)
         )
