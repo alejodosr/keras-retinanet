@@ -524,15 +524,15 @@ def main(args=None):
                 tf.contrib.cluster_resolver.TPUClusterResolver(TPU_WORKER)))
 
         # start training
-        tpu_model.fit_generator(
-            generator=train_generator,
-            steps_per_epoch=args.steps,
-            epochs=args.epochs,
-            verbose=1,
-            callbacks=callbacks,
-            initial_epoch=args.initial_epoch,
-            batch_size=128 * 8,
-        )
+        # tpu_model.fit_generator(
+        #     generator=train_generator,
+        #     steps_per_epoch=args.steps,
+        #     epochs=args.epochs,
+        #     verbose=1,
+        #     callbacks=callbacks,
+        #     initial_epoch=args.initial_epoch,
+        #     batch_size=128 * 8,
+        # )
 
 
 if __name__ == '__main__':
