@@ -120,7 +120,8 @@ def create_models(backbone_retinanet, num_classes, weights, multi_gpu=0, freeze_
         training_model = model
 
     # make prediction model
-    prediction_model = retinanet_bbox(model=model, anchor_params=anchor_params, use_tpu=use_tpu)
+    # prediction_model = retinanet_bbox(model=model, anchor_params=anchor_params, use_tpu=use_tpu)
+    prediction_model = []
 
     if not use_tpu:
         # compile model
