@@ -317,6 +317,7 @@ def retinanet_bbox(
     class_specific_filter = True,
     name                  = 'retinanet-bbox',
     anchor_params         = None,
+    use_tpu               = False,
     **kwargs
 ):
     """ Construct a RetinaNet model on top of a backbone and adds convenience functions to output boxes directly.
@@ -349,7 +350,7 @@ def retinanet_bbox(
 
     # create RetinaNet model
     if model is None:
-        model = retinanet(num_anchors=anchor_params.num_anchors(), **kwargs)
+        model = retinanet(num_anchors=anchor_params.num_anchors(), use_tpu=use_tpu, **kwargs)
     else:
         assert_training_model(model)
 
