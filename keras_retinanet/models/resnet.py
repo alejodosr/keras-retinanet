@@ -93,12 +93,12 @@ def resnet_retinanet(num_classes, backbone='resnet50', inputs=None, modifier=Non
     if inputs is None:
         if keras.backend.image_data_format() == 'channels_first':
             if static_batch_size:
-                inputs = keras.layers.Input(batch_shape=(128, 3, 640, 479))
+                inputs = keras.layers.Input(batch_shape=(128, 3, 800, 1069))
             else:
                 inputs = keras.layers.Input(shape=(3, None, None))
         else:
             if static_batch_size:
-                inputs = keras.layers.Input(batch_shape=(128, 640, 479, 3))
+                inputs = keras.layers.Input(batch_shape=(128, 800, 1069, 3))
             else:
                 inputs = keras.layers.Input(shape=(None, None, 3))
 
