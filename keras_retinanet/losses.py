@@ -44,7 +44,7 @@ def focal(alpha=0.25, gamma=2.0):
         num_classes = 1
         labels         = y_true[:, :, :-1]
         anchor_state   = y_true[:, :, -1]  # -1 for ignore, 0 for background, 1 for object
-        y_pred = keras.layers.core.Reshape((-1, num_classes))(y_pred)
+        # y_pred = keras.layers.core.Reshape((-1, num_classes))(y_pred)
         classification = y_pred
 
         # filter out "ignore" anchors
@@ -93,7 +93,7 @@ def smooth_l1(sigma=3.0):
         """
         # separate target and state
         num_values = 4
-        y_pred = keras.layers.core.Reshape((-1, num_values))(y_pred)
+        # y_pred = keras.layers.core.Reshape((-1, num_values))(y_pred)
         regression        = y_pred
         regression_target = y_true[:, :, :-1]
         anchor_state      = y_true[:, :, -1]
