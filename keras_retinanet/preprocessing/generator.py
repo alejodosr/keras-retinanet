@@ -310,6 +310,10 @@ class Generator(object):
         # compute network targets
         targets = self.compute_targets(image_group, annotations_group)
 
+        # Debug
+        print(inputs.shape)
+        print(targets.shape)
+
         return inputs, targets
 
     def __next__(self):
