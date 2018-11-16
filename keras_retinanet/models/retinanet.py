@@ -385,7 +385,10 @@ def retinanet(
     outputs = keras.layers.Conv2D(num_anchors * num_values, name='pyramid_regression' + '_' + str(p3_width) + '_' + str(p3_height), **options)(outputs)
     if keras.backend.image_data_format() == 'channels_first':
         outputs = keras.layers.Permute((2, 3, 1), name='pyramid_regression_permute' + '_' + str(p3_width) + '_' + str(p3_height))(outputs)
-    regression_outputs_p3 = keras.layers.Reshape((-1, num_values), name='pyramid_regression_reshape' + '_' + str(p3_width) + '_' + str(p3_height))(outputs)
+    # regression_outputs_p3 = keras.layers.Reshape((-1, num_values), name='pyramid_regression_reshape' + '_' + str(p3_width) + '_' + str(p3_height))(outputs)
+    # outputs = keras.layers.Flatten()(outputs)
+    # outputs = keras.layers.Dense(num_values, name='pyramid_regression_dense' + '_' + str(p3_width) + '_' + str(p3_height))(outputs)
+    regression_outputs_p3 = outputs
 
     options = {
         'kernel_size': 3,
@@ -416,8 +419,12 @@ def retinanet(
     # reshape output and apply sigmoid
     if keras.backend.image_data_format() == 'channels_first':
         outputs = keras.layers.Permute((2, 3, 1), name='pyramid_classification_permute' + '_' + str(p3_width) + '_' + str(p3_height))(outputs)
-    outputs = keras.layers.Reshape((-1, num_classes), name='pyramid_classification_reshape' + '_' + str(p3_width) + '_' + str(p3_height))(outputs)
-    classification_outputs_p3 = keras.layers.Activation('sigmoid', name='pyramid_classification_sigmoid' + '_' + str(p3_width) + '_' + str(p3_height))(outputs)
+    # outputs = keras.layers.Reshape((-1, num_classes), name='pyramid_classification_reshape' + '_' + str(p3_width) + '_' + str(p3_height))(outputs)
+    # outputs = keras.layers.Flatten()(outputs)
+    # outputs = keras.layers.Dense(num_classes, name='pyramid_classification_dense' + '_' + str(p3_width) + '_' + str(p3_height))(outputs)
+    outputs = keras.layers.Activation('sigmoid', name='pyramid_classification_sigmoid' + '_' + str(p3_width) + '_' + str(p3_height))(outputs)
+    classification_outputs_p3 = outputs
+
 
     #### P4 regression and classification layers ####
 
@@ -444,7 +451,10 @@ def retinanet(
     outputs = keras.layers.Conv2D(num_anchors * num_values, name='pyramid_regression' + '_' + str(p4_width) + '_' + str(p4_height), **options)(outputs)
     if keras.backend.image_data_format() == 'channels_first':
         outputs = keras.layers.Permute((2, 3, 1), name='pyramid_regression_permute' + '_' + str(p4_width) + '_' + str(p4_height))(outputs)
-    regression_outputs_p4 = keras.layers.Reshape((-1, num_values), name='pyramid_regression_reshape' + '_' + str(p4_width) + '_' + str(p4_height))(outputs)
+    # regression_outputs_p4 = keras.layers.Reshape((-1, num_values), name='pyramid_regression_reshape' + '_' + str(p4_width) + '_' + str(p4_height))(outputs)
+    # outputs = keras.layers.Flatten()(outputs)
+    # outputs = keras.layers.Dense(num_values, name='pyramid_regression_dense' + '_' + str(p4_width) + '_' + str(p4_height))(outputs)
+    regression_outputs_p4 = outputs
 
     options = {
         'kernel_size' : 3,
@@ -475,8 +485,11 @@ def retinanet(
     # reshape output and apply sigmoid
     if keras.backend.image_data_format() == 'channels_first':
         outputs = keras.layers.Permute((2, 3, 1), name='pyramid_classification_permute' + '_' + str(p4_width) + '_' + str(p4_height))(outputs)
-    outputs = keras.layers.Reshape((-1, num_classes), name='pyramid_classification_reshape' + '_' + str(p4_width) + '_' + str(p4_height))(outputs)
-    classification_outputs_p4 = keras.layers.Activation('sigmoid', name='pyramid_classification_sigmoid' + '_' + str(p4_width) + '_' + str(p4_height))(outputs)
+    # outputs = keras.layers.Reshape((-1, num_classes), name='pyramid_classification_reshape' + '_' + str(p4_width) + '_' + str(p4_height))(outputs)
+    # outputs = keras.layers.Flatten()(outputs)
+    # outputs = keras.layers.Dense(num_classes, name='pyramid_classification_dense' + '_' + str(p4_width) + '_' + str(p4_height))(outputs)
+    outputs = keras.layers.Activation('sigmoid', name='pyramid_classification_sigmoid' + '_' + str(p4_width) + '_' + str(p4_height))(outputs)
+    classification_outputs_p4 = outputs
 
     #### P5 regression and classification layers ####
 
@@ -503,7 +516,10 @@ def retinanet(
     outputs = keras.layers.Conv2D(num_anchors * num_values, name='pyramid_regression' + '_' + str(p5_width) + '_' + str(p5_height), **options)(outputs)
     if keras.backend.image_data_format() == 'channels_first':
         outputs = keras.layers.Permute((2, 3, 1), name='pyramid_regression_permute' + '_' + str(p5_width) + '_' + str(p5_height))(outputs)
-    regression_outputs_p5 = keras.layers.Reshape((-1, num_values), name='pyramid_regression_reshape' + '_' + str(p5_width) + '_' + str(p5_height))(outputs)
+    # regression_outputs_p5 = keras.layers.Reshape((-1, num_values), name='pyramid_regression_reshape' + '_' + str(p5_width) + '_' + str(p5_height))(outputs)
+    # outputs = keras.layers.Flatten()(outputs)
+    # outputs = keras.layers.Dense(num_values, name='pyramid_regression_dense' + '_' + str(p5_width) + '_' + str(p5_height))(outputs)
+    regression_outputs_p5 = outputs
 
     options = {
         'kernel_size' : 3,
@@ -534,8 +550,11 @@ def retinanet(
     # reshape output and apply sigmoid
     if keras.backend.image_data_format() == 'channels_first':
         outputs = keras.layers.Permute((2, 3, 1), name='pyramid_classification_permute' + '_' + str(p5_width) + '_' + str(p5_height))(outputs)
-    outputs = keras.layers.Reshape((-1, num_classes), name='pyramid_classification_reshape' + '_' + str(p5_width) + '_' + str(p5_height))(outputs)
-    classification_outputs_p5 = keras.layers.Activation('sigmoid', name='pyramid_classification_sigmoid' + '_' + str(p5_width) + '_' + str(p5_height))(outputs)
+    # outputs = keras.layers.Reshape((-1, num_classes), name='pyramid_classification_reshape' + '_' + str(p5_width) + '_' + str(p5_height))(outputs)
+    # outputs = keras.layers.Flatten()(outputs)
+    # outputs = keras.layers.Dense(num_classes, name='pyramid_classification_dense' + '_' + str(p5_width) + '_' + str(p5_height))(outputs)
+    outputs = keras.layers.Activation('sigmoid', name='pyramid_classification_sigmoid' + '_' + str(p5_width) + '_' + str(p5_height))(outputs)
+    classification_outputs_p5 = outputs
 
     #### P6 regression and classification layers ####
 
@@ -562,7 +581,10 @@ def retinanet(
     outputs = keras.layers.Conv2D(num_anchors * num_values, name='pyramid_regression' + '_' + str(p6_width) + '_' + str(p6_height), **options)(outputs)
     if keras.backend.image_data_format() == 'channels_first':
         outputs = keras.layers.Permute((2, 3, 1), name='pyramid_regression_permute' + '_' + str(p6_width) + '_' + str(p6_height))(outputs)
-    regression_outputs_p6 = keras.layers.Reshape((-1, num_values), name='pyramid_regression_reshape' + '_' + str(p6_width) + '_' + str(p6_height))(outputs)
+    # regression_outputs_p6 = keras.layers.Reshape((-1, num_values), name='pyramid_regression_reshape' + '_' + str(p6_width) + '_' + str(p6_height))(outputs)
+    # outputs = keras.layers.Flatten()(outputs)
+    # outputs = keras.layers.Dense(num_values, name='pyramid_regression_dense' + '_' + str(p6_width) + '_' + str(p6_height))(outputs)
+    regression_outputs_p6 = outputs
 
     options = {
         'kernel_size' : 3,
@@ -593,8 +615,11 @@ def retinanet(
     # reshape output and apply sigmoid
     if keras.backend.image_data_format() == 'channels_first':
         outputs = keras.layers.Permute((2, 3, 1), name='pyramid_classification_permute' + '_' + str(p6_width) + '_' + str(p6_height))(outputs)
-    outputs = keras.layers.Reshape((-1, num_classes), name='pyramid_classification_reshape' + '_' + str(p6_width) + '_' + str(p6_height))(outputs)
-    classification_outputs_p6 = keras.layers.Activation('sigmoid', name='pyramid_classification_sigmoid' + '_' + str(p6_width) + '_' + str(p6_height))(outputs)
+    # outputs = keras.layers.Reshape((-1, num_classes), name='pyramid_classification_reshape' + '_' + str(p6_width) + '_' + str(p6_height))(outputs)
+    # outputs = keras.layers.Flatten()(outputs)
+    # outputs = keras.layers.Dense(num_classes, name='pyramid_classification_dense' + '_' + str(p6_width) + '_' + str(p6_height))(outputs)
+    outputs = keras.layers.Activation('sigmoid', name='pyramid_classification_sigmoid' + '_' + str(p6_width) + '_' + str(p6_height))(outputs)
+    classification_outputs_p6 = outputs
 
     #### P7 regression and classification layers ####
 
@@ -621,7 +646,10 @@ def retinanet(
     outputs = keras.layers.Conv2D(num_anchors * num_values, name='pyramid_regression' + '_' + str(p7_width) + '_' + str(p7_height), **options)(outputs)
     if keras.backend.image_data_format() == 'channels_first':
         outputs = keras.layers.Permute((2, 3, 1), name='pyramid_regression_permute' + '_' + str(p7_width) + '_' + str(p7_height))(outputs)
-    regression_outputs_p7 = keras.layers.Reshape((-1, num_values), name='pyramid_regression_reshape' + '_' + str(p7_width) + '_' + str(p7_height))(outputs)
+    # regression_outputs_p7 = keras.layers.Reshape((-1, num_values), name='pyramid_regression_reshape' + '_' + str(p7_width) + '_' + str(p7_height))(outputs)
+    # outputs = keras.layers.Flatten()(outputs)
+    # outputs = keras.layers.Dense(num_values, name='pyramid_regression_dense' + '_' + str(p7_width) + '_' + str(p7_height))(outputs)
+    regression_outputs_p7 = outputs
 
     options = {
         'kernel_size' : 3,
@@ -652,11 +680,17 @@ def retinanet(
     # reshape output and apply sigmoid
     if keras.backend.image_data_format() == 'channels_first':
         outputs = keras.layers.Permute((2, 3, 1), name='pyramid_classification_permute' + '_' + str(p7_width) + '_' + str(p7_height))(outputs)
-    outputs = keras.layers.Reshape((-1, num_classes), name='pyramid_classification_reshape' + '_' + str(p7_width) + '_' + str(p7_height))(outputs)
-    classification_outputs_p7 = keras.layers.Activation('sigmoid', name='pyramid_classification_sigmoid' + '_' + str(p7_width) + '_' + str(p7_height))(outputs)
+    # outputs = keras.layers.Reshape((-1, num_classes), name='pyramid_classification_reshape' + '_' + str(p7_width) + '_' + str(p7_height))(outputs)
+    # outputs = keras.layers.Flatten()(outputs)
+    # outputs = keras.layers.Dense(num_classes, name='pyramid_classification_dense' + '_' + str(p7_width) + '_' + str(p7_height))(outputs)
+    outputs = keras.layers.Activation('sigmoid', name='pyramid_classification_sigmoid' + '_' + str(p7_width) + '_' + str(p7_height))(outputs)
+    classification_outputs_p7 = outputs
 
-    pyramids = [keras.layers.Concatenate(axis=1, name="regression")([regression_outputs_p3, regression_outputs_p4, regression_outputs_p5, regression_outputs_p6, regression_outputs_p7]), \
-                keras.layers.Concatenate(axis=1, name="classification")([classification_outputs_p3, classification_outputs_p4, classification_outputs_p5, classification_outputs_p6, classification_outputs_p7])]
+    # pyramids = [keras.layers.Concatenate(axis=1, name="regression")([regression_outputs_p3, regression_outputs_p4, regression_outputs_p5, regression_outputs_p6, regression_outputs_p7]), \
+    #             keras.layers.Concatenate(axis=1, name="classification")([classification_outputs_p3, classification_outputs_p4, classification_outputs_p5, classification_outputs_p6, classification_outputs_p7])]
+
+    pyramids = [regression_outputs_p3, regression_outputs_p4, regression_outputs_p5, regression_outputs_p6, regression_outputs_p7,
+                classification_outputs_p3, classification_outputs_p4, classification_outputs_p5, classification_outputs_p6, classification_outputs_p7]
 
     # for all pyramid levels, run available submodels
     # pyramids = __build_pyramid(submodels, features)

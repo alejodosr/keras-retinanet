@@ -163,8 +163,16 @@ def create_models(backbone_retinanet, num_classes, weights, multi_gpu=0, freeze_
 
         training_model.compile(
             loss={
-                'regression'    : losses.smooth_l1(),
-                'classification': losses.focal()
+                'pyramid_regression_100_134'    : losses.smooth_l1(),
+                'pyramid_classification_sigmoid_100_134': losses.focal(),
+                'pyramid_regression_50_67': losses.smooth_l1(),
+                'pyramid_classification_sigmoid_50_67': losses.focal(),
+                'pyramid_regression_25_34': losses.smooth_l1(),
+                'pyramid_classification_sigmoid_25_34': losses.focal(),
+                'pyramid_regression_13_17': losses.smooth_l1(),
+                'pyramid_classification_sigmoid_13_17': losses.focal(),
+                'pyramid_regression_7_9': losses.smooth_l1(),
+                'pyramid_classification_sigmoid_7_9': losses.focal()
             },
             optimizer=tf.train.AdamOptimizer(learning_rate=1e-5)
         )
