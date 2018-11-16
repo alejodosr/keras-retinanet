@@ -55,13 +55,13 @@ def default_classification_model(
         if not use_tpu:
             inputs = keras.layers.Input(shape=(pyramid_feature_size, width, height))
         else:
-            inputs = keras.layers.Input(batch_shape=(1, pyramid_feature_size, width, height), name="P3")
+            inputs = keras.layers.Input(batch_shape=(1, pyramid_feature_size, width, height), name="classification_submodel_100_134")
             # inputs = keras.layers.Input(shape=(pyramid_feature_size, width, height), batch_size=1, dtype=tf.float32)
     else:
         if not use_tpu:
             inputs = keras.layers.Input(shape=(width, height, pyramid_feature_size))
         else:
-            inputs = keras.layers.Input(batch_shape=(1, width, height, pyramid_feature_size), name="P3")
+            inputs = keras.layers.Input(batch_shape=(1, width, height, pyramid_feature_size), name="classification_submodel_100_134")
             # inputs = keras.layers.Input(shape=(width, height, pyramid_feature_size), batch_size=1, dtype=tf.float32)
     outputs = inputs
     for i in range(4):
@@ -121,13 +121,13 @@ def default_regression_model(num_values, num_anchors, width, height, pyramid_fea
         if not use_tpu:
             inputs  = keras.layers.Input(shape=(pyramid_feature_size, width, height))
         else:
-            inputs = keras.layers.Input(batch_shape=(1, pyramid_feature_size, width, height), name="P3")
+            inputs = keras.layers.Input(batch_shape=(1, pyramid_feature_size, width, height), name="regression_submodel_100_134")
             # inputs = keras.layers.Input(shape=(pyramid_feature_size, width, height), batch_size=1, dtype=tf.float32)
     else:
         if not use_tpu:
             inputs  = keras.layers.Input(shape=(width, height, pyramid_feature_size))
         else:
-            inputs = keras.layers.Input(batch_shape=(1, width, height, pyramid_feature_size), name="P3")
+            inputs = keras.layers.Input(batch_shape=(1, width, height, pyramid_feature_size), name="regression_submodel_100_134")
             # inputs = keras.layers.Input(shape=(width, height, pyramid_feature_size), batch_size=1, dtype=tf.float32)
     outputs = inputs
     for i in range(4):
