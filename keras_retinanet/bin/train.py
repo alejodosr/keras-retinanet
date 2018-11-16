@@ -505,9 +505,6 @@ def main(args=None):
             use_tpu=args.use_tpu,
         )
 
-    # print model summary
-    print(model.summary())
-
     # this lets the generator compute backbone layer shapes using the actual backbone model
     if 'vgg' in args.backbone or 'densenet' in args.backbone:
         train_generator.compute_shapes = make_shapes_callback(model)
@@ -542,6 +539,9 @@ def main(args=None):
             training_model,
             strategy=tf.contrib.tpu.TPUDistributionStrategy(
                 tf.contrib.cluster_resolver.TPUClusterResolver(TPU_WORKER)))
+
+        # print model summary
+        print(tpu_model.summary())
 
         # start training
         tpu_model.fit_generator(

@@ -255,7 +255,7 @@ class Generator(object):
         max_shape = tuple(max(image.shape[x] for image in image_group) for x in range(3))
 
         # construct an image batch object
-        image_batch = np.zeros((self.batch_size,) + max_shape, dtype=keras.backend.floatx())
+        image_batch = np.zeros((self.batch_size,) + max_shape, dtype=keras.backend.intx())
 
         # copy all images to the upper left part of the image batch object
         for image_index, image in enumerate(image_group):
