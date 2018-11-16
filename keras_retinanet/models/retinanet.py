@@ -315,19 +315,351 @@ def retinanet(
         ```
     """
 
+    # if num_anchors is None:
+    #     num_anchors = AnchorParameters.default.num_anchors()
+    #
+    # if submodels is None:
+    #     submodels = default_submodels(num_classes, num_anchors, use_tpu=use_tpu)
+    #
+    # C3, C4, C5 = backbone_layers
+    #
+    # # compute pyramid features as per https://arxiv.org/abs/1708.02002
+    # features = create_pyramid_features(C3, C4, C5)
+    #
+    # # for all pyramid levels, run available submodels
+    # pyramids = __build_pyramid(submodels, features)
+    #
+    # return keras.models.Model(inputs=inputs, outputs=pyramids, name=name)
+
     if num_anchors is None:
         num_anchors = AnchorParameters.default.num_anchors()
 
-    if submodels is None:
-        submodels = default_submodels(num_classes, num_anchors, use_tpu=use_tpu)
+    # if submodels is None:
+    #     submodels = default_submodels(num_classes, num_anchors, use_tpu=use_tpu)
 
     C3, C4, C5 = backbone_layers
 
     # compute pyramid features as per https://arxiv.org/abs/1708.02002
     features = create_pyramid_features(C3, C4, C5)
 
+
+
+    ####### Create regression and classification layers #######
+
+    regression_feature_size = 256
+    classification_feature_size = 256
+    num_values = 4
+    p3_width = 100
+    p3_height = 134
+    p4_width = 50
+    p4_height = 67
+    p5_width = 25
+    p5_height = 34
+    p6_width = 13
+    p6_height = 17
+    p7_width = 7
+    p7_height = 9
+
+    #### P3 regression and classification layers ####
+
+    # All new conv layers except the final one in the
+    # RetinaNet (classification) subnets are initialized
+    # with bias b = 0 and a Gaussian weight fill with stddev = 0.01.
+    options = {
+        'kernel_size'        : 3,
+        'strides'            : 1,
+        'padding'            : 'same',
+        'kernel_initializer' : keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
+        'bias_initializer'   : 'zeros'
+    }
+
+    outputs = features[0]
+    for i in range(4):
+        outputs = keras.layers.Conv2D(
+            filters=regression_feature_size,
+            activation='relu',
+            name='pyramid_regression_{}'.format(i) + '_' + str(p3_width) + '_' + str(p3_height),
+            **options
+        )(outputs)
+
+    outputs = keras.layers.Conv2D(num_anchors * num_values, name='pyramid_regression' + '_' + str(p3_width) + '_' + str(p3_height), **options)(outputs)
+    if keras.backend.image_data_format() == 'channels_first':
+        outputs = keras.layers.Permute((2, 3, 1), name='pyramid_regression_permute' + '_' + str(p3_width) + '_' + str(p3_height))(outputs)
+    regression_outputs_p3 = keras.layers.Reshape((-1, num_values), name='pyramid_regression_reshape' + '_' + str(p3_width) + '_' + str(p3_height))(outputs)
+
+    options = {
+        'kernel_size': 3,
+        'strides': 1,
+        'padding': 'same',
+    }
+
+    outputs = features[0]
+    for i in range(4):
+        outputs = keras.layers.Conv2D(
+            filters=classification_feature_size,
+            activation='relu',
+            name='pyramid_classification_{}'.format(i) + '_' + str(p3_width) + '_' + str(p3_height),
+            kernel_initializer=keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
+            bias_initializer='zeros',
+            **options
+        )(outputs)
+
+    outputs = keras.layers.Conv2D(
+        filters=num_classes * num_anchors,
+        kernel_initializer=keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
+        bias_initializer=keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
+        # bias_initializer=initializers.PriorProbability(probability=prior_probability),
+        name='pyramid_classification' + '_' + str(p3_width) + '_' + str(p3_height),
+        **options
+    )(outputs)
+
+    # reshape output and apply sigmoid
+    if keras.backend.image_data_format() == 'channels_first':
+        outputs = keras.layers.Permute((2, 3, 1), name='pyramid_classification_permute' + '_' + str(p3_width) + '_' + str(p3_height))(outputs)
+    outputs = keras.layers.Reshape((-1, num_classes), name='pyramid_classification_reshape' + '_' + str(p3_width) + '_' + str(p3_height))(outputs)
+    classification_outputs_p3 = keras.layers.Activation('sigmoid', name='pyramid_classification_sigmoid' + '_' + str(p3_width) + '_' + str(p3_height))(outputs)
+
+    #### P4 regression and classification layers ####
+
+    # All new conv layers except the final one in the
+    # RetinaNet (classification) subnets are initialized
+    # with bias b = 0 and a Gaussian weight fill with stddev = 0.01.
+    options = {
+        'kernel_size'        : 3,
+        'strides'            : 1,
+        'padding'            : 'same',
+        'kernel_initializer' : keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
+        'bias_initializer'   : 'zeros'
+    }
+
+    outputs = features[1]
+    for i in range(4):
+        outputs = keras.layers.Conv2D(
+            filters=regression_feature_size,
+            activation='relu',
+            name='pyramid_regression_{}'.format(i) + '_' + str(p4_width) + '_' + str(p4_height),
+            **options
+        )(outputs)
+
+    outputs = keras.layers.Conv2D(num_anchors * num_values, name='pyramid_regression' + '_' + str(p4_width) + '_' + str(p4_height), **options)(outputs)
+    if keras.backend.image_data_format() == 'channels_first':
+        outputs = keras.layers.Permute((2, 3, 1), name='pyramid_regression_permute' + '_' + str(p4_width) + '_' + str(p4_height))(outputs)
+    regression_outputs_p4 = keras.layers.Reshape((-1, num_values), name='pyramid_regression_reshape' + '_' + str(p4_width) + '_' + str(p4_height))(outputs)
+
+    options = {
+        'kernel_size' : 3,
+        'strides'     : 1,
+        'padding'     : 'same',
+    }
+
+    outputs = features[1]
+    for i in range(4):
+        outputs = keras.layers.Conv2D(
+            filters=classification_feature_size,
+            activation='relu',
+            name='pyramid_classification_{}'.format(i) + '_' + str(p4_width) + '_' + str(p4_height),
+            kernel_initializer=keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
+            bias_initializer='zeros',
+            **options
+        )(outputs)
+
+    outputs = keras.layers.Conv2D(
+        filters=num_classes * num_anchors,
+        kernel_initializer=keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
+        bias_initializer=keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
+        # bias_initializer=initializers.PriorProbability(probability=prior_probability),
+        name='pyramid_classification' + '_' + str(p4_width) + '_' + str(p4_height),
+        **options
+    )(outputs)
+
+    # reshape output and apply sigmoid
+    if keras.backend.image_data_format() == 'channels_first':
+        outputs = keras.layers.Permute((2, 3, 1), name='pyramid_classification_permute' + '_' + str(p4_width) + '_' + str(p4_height))(outputs)
+    outputs = keras.layers.Reshape((-1, num_classes), name='pyramid_classification_reshape' + '_' + str(p4_width) + '_' + str(p4_height))(outputs)
+    classification_outputs_p4 = keras.layers.Activation('sigmoid', name='pyramid_classification_sigmoid' + '_' + str(p4_width) + '_' + str(p4_height))(outputs)
+
+    #### P5 regression and classification layers ####
+
+    # All new conv layers except the final one in the
+    # RetinaNet (classification) subnets are initialized
+    # with bias b = 0 and a Gaussian weight fill with stddev = 0.01.
+    options = {
+        'kernel_size'        : 3,
+        'strides'            : 1,
+        'padding'            : 'same',
+        'kernel_initializer' : keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
+        'bias_initializer'   : 'zeros'
+    }
+
+    outputs = features[2]
+    for i in range(4):
+        outputs = keras.layers.Conv2D(
+            filters=regression_feature_size,
+            activation='relu',
+            name='pyramid_regression_{}'.format(i) + '_' + str(p5_width) + '_' + str(p5_height),
+            **options
+        )(outputs)
+
+    outputs = keras.layers.Conv2D(num_anchors * num_values, name='pyramid_regression' + '_' + str(p5_width) + '_' + str(p5_height), **options)(outputs)
+    if keras.backend.image_data_format() == 'channels_first':
+        outputs = keras.layers.Permute((2, 3, 1), name='pyramid_regression_permute' + '_' + str(p5_width) + '_' + str(p5_height))(outputs)
+    regression_outputs_p5 = keras.layers.Reshape((-1, num_values), name='pyramid_regression_reshape' + '_' + str(p5_width) + '_' + str(p5_height))(outputs)
+
+    options = {
+        'kernel_size' : 3,
+        'strides'     : 1,
+        'padding'     : 'same',
+    }
+
+    outputs = features[2]
+    for i in range(4):
+        outputs = keras.layers.Conv2D(
+            filters=classification_feature_size,
+            activation='relu',
+            name='pyramid_classification_{}'.format(i) + '_' + str(p5_width) + '_' + str(p5_height),
+            kernel_initializer=keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
+            bias_initializer='zeros',
+            **options
+        )(outputs)
+
+    outputs = keras.layers.Conv2D(
+        filters=num_classes * num_anchors,
+        kernel_initializer=keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
+        bias_initializer=keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
+        # bias_initializer=initializers.PriorProbability(probability=prior_probability),
+        name='pyramid_classification' + '_' + str(p5_width) + '_' + str(p5_height),
+        **options
+    )(outputs)
+
+    # reshape output and apply sigmoid
+    if keras.backend.image_data_format() == 'channels_first':
+        outputs = keras.layers.Permute((2, 3, 1), name='pyramid_classification_permute' + '_' + str(p5_width) + '_' + str(p5_height))(outputs)
+    outputs = keras.layers.Reshape((-1, num_classes), name='pyramid_classification_reshape' + '_' + str(p5_width) + '_' + str(p5_height))(outputs)
+    classification_outputs_p5 = keras.layers.Activation('sigmoid', name='pyramid_classification_sigmoid' + '_' + str(p5_width) + '_' + str(p5_height))(outputs)
+
+    #### P6 regression and classification layers ####
+
+    # All new conv layers except the final one in the
+    # RetinaNet (classification) subnets are initialized
+    # with bias b = 0 and a Gaussian weight fill with stddev = 0.01.
+    options = {
+        'kernel_size'        : 3,
+        'strides'            : 1,
+        'padding'            : 'same',
+        'kernel_initializer' : keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
+        'bias_initializer'   : 'zeros'
+    }
+
+    outputs = features[3]
+    for i in range(4):
+        outputs = keras.layers.Conv2D(
+            filters=regression_feature_size,
+            activation='relu',
+            name='pyramid_regression_{}'.format(i) + '_' + str(p6_width) + '_' + str(p6_height),
+            **options
+        )(outputs)
+
+    outputs = keras.layers.Conv2D(num_anchors * num_values, name='pyramid_regression' + '_' + str(p6_width) + '_' + str(p6_height), **options)(outputs)
+    if keras.backend.image_data_format() == 'channels_first':
+        outputs = keras.layers.Permute((2, 3, 1), name='pyramid_regression_permute' + '_' + str(p6_width) + '_' + str(p6_height))(outputs)
+    regression_outputs_p6 = keras.layers.Reshape((-1, num_values), name='pyramid_regression_reshape' + '_' + str(p6_width) + '_' + str(p6_height))(outputs)
+
+    options = {
+        'kernel_size' : 3,
+        'strides'     : 1,
+        'padding'     : 'same',
+    }
+
+    outputs = features[3]
+    for i in range(4):
+        outputs = keras.layers.Conv2D(
+            filters=classification_feature_size,
+            activation='relu',
+            name='pyramid_classification_{}'.format(i) + '_' + str(p6_width) + '_' + str(p6_height),
+            kernel_initializer=keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
+            bias_initializer='zeros',
+            **options
+        )(outputs)
+
+    outputs = keras.layers.Conv2D(
+        filters=num_classes * num_anchors,
+        kernel_initializer=keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
+        bias_initializer=keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
+        # bias_initializer=initializers.PriorProbability(probability=prior_probability),
+        name='pyramid_classification' + '_' + str(p6_width) + '_' + str(p6_height),
+        **options
+    )(outputs)
+
+    # reshape output and apply sigmoid
+    if keras.backend.image_data_format() == 'channels_first':
+        outputs = keras.layers.Permute((2, 3, 1), name='pyramid_classification_permute' + '_' + str(p6_width) + '_' + str(p6_height))(outputs)
+    outputs = keras.layers.Reshape((-1, num_classes), name='pyramid_classification_reshape' + '_' + str(p6_width) + '_' + str(p6_height))(outputs)
+    classification_outputs_p6 = keras.layers.Activation('sigmoid', name='pyramid_classification_sigmoid' + '_' + str(p6_width) + '_' + str(p6_height))(outputs)
+
+    #### P7 regression and classification layers ####
+
+    # All new conv layers except the final one in the
+    # RetinaNet (classification) subnets are initialized
+    # with bias b = 0 and a Gaussian weight fill with stddev = 0.01.
+    options = {
+        'kernel_size'        : 3,
+        'strides'            : 1,
+        'padding'            : 'same',
+        'kernel_initializer' : keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
+        'bias_initializer'   : 'zeros'
+    }
+
+    outputs = features[4]
+    for i in range(4):
+        outputs = keras.layers.Conv2D(
+            filters=regression_feature_size,
+            activation='relu',
+            name='pyramid_regression_{}'.format(i) + '_' + str(p7_width) + '_' + str(p7_height),
+            **options
+        )(outputs)
+
+    outputs = keras.layers.Conv2D(num_anchors * num_values, name='pyramid_regression' + '_' + str(p7_width) + '_' + str(p7_height), **options)(outputs)
+    if keras.backend.image_data_format() == 'channels_first':
+        outputs = keras.layers.Permute((2, 3, 1), name='pyramid_regression_permute' + '_' + str(p7_width) + '_' + str(p7_height))(outputs)
+    regression_outputs_p7 = keras.layers.Reshape((-1, num_values), name='pyramid_regression_reshape' + '_' + str(p7_width) + '_' + str(p7_height))(outputs)
+
+    options = {
+        'kernel_size' : 3,
+        'strides'     : 1,
+        'padding'     : 'same',
+    }
+
+    outputs = features[4]
+    for i in range(4):
+        outputs = keras.layers.Conv2D(
+            filters=classification_feature_size,
+            activation='relu',
+            name='pyramid_classification_{}'.format(i) + '_' + str(p7_width) + '_' + str(p7_height),
+            kernel_initializer=keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
+            bias_initializer='zeros',
+            **options
+        )(outputs)
+
+    outputs = keras.layers.Conv2D(
+        filters=num_classes * num_anchors,
+        kernel_initializer=keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
+        bias_initializer=keras.initializers.normal(mean=0.0, stddev=0.01, seed=None),
+        # bias_initializer=initializers.PriorProbability(probability=prior_probability),
+        name='pyramid_classification' + '_' + str(p7_width) + '_' + str(p7_height),
+        **options
+    )(outputs)
+
+    # reshape output and apply sigmoid
+    if keras.backend.image_data_format() == 'channels_first':
+        outputs = keras.layers.Permute((2, 3, 1), name='pyramid_classification_permute' + '_' + str(p7_width) + '_' + str(p7_height))(outputs)
+    outputs = keras.layers.Reshape((-1, num_classes), name='pyramid_classification_reshape' + '_' + str(p7_width) + '_' + str(p7_height))(outputs)
+    classification_outputs_p7 = keras.layers.Activation('sigmoid', name='pyramid_classification_sigmoid' + '_' + str(p7_width) + '_' + str(p7_height))(outputs)
+
+    pyramids = [keras.layers.Concatenate(axis=1, name="regression")([regression_outputs_p3, regression_outputs_p4, regression_outputs_p5, regression_outputs_p6, regression_outputs_p7]), \
+                keras.layers.Concatenate(axis=1, name="classification")([classification_outputs_p3, classification_outputs_p4, classification_outputs_p5, classification_outputs_p6, classification_outputs_p7])]
+
     # for all pyramid levels, run available submodels
-    pyramids = __build_pyramid(submodels, features)
+    # pyramids = __build_pyramid(submodels, features)
 
     return keras.models.Model(inputs=inputs, outputs=pyramids, name=name)
 

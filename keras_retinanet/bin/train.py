@@ -520,6 +520,8 @@ def main(args=None):
         args,
     )
 
+    # print(training_model.summary())
+
     if not args.use_tpu:
         # start training
         training_model.fit_generator(
