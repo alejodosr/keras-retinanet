@@ -92,6 +92,7 @@ def default_classification_model(
     return keras.models.Model(inputs=inputs, outputs=outputs, name=name + '_'  + str(width) + '_' + str(height))
 
 
+
 def default_regression_model(num_values, num_anchors, width, height, pyramid_feature_size=256, regression_feature_size=256, name='regression_submodel', use_tpu = False):
     """ Creates the default regression submodel.
 

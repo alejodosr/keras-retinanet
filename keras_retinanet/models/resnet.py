@@ -89,6 +89,7 @@ def resnet_retinanet(num_classes, backbone='resnet50', inputs=None, modifier=Non
     Returns
         RetinaNet model with a ResNet backbone.
     """
+
     # choose default input
     if inputs is None:
         if keras.backend.image_data_format() == 'channels_first':
