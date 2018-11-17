@@ -311,8 +311,9 @@ class Generator(object):
         targets = self.compute_targets(image_group, annotations_group)
 
         # Debug
-        print(inputs.shape)
-        print(targets.shape)
+        print("inputs:" + str(inputs.shape))
+        print("length of array: " + str(len(targets)))
+        print("outputs: " + str(targets[0].shape))
 
         return inputs, targets
 
