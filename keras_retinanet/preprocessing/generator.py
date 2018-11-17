@@ -311,11 +311,18 @@ class Generator(object):
         targets = self.compute_targets(image_group, annotations_group)
 
         # Debug
-        print("inputs:" + str(inputs.shape))
-        print("length of array: " + str(len(targets)))
-        print("outputs: " + str(targets[0].shape))
+        # print("inputs:" + str(inputs.shape))
+        # print("length of array: " + str(len(targets)))
+        # print("outputs: " + str(targets[0].shape))
 
-        return inputs, targets
+        # Modification to handle multiple outputs
+        NUM_OUT_SUBMODELS = 5
+        targets_modified = list()
+        for i in range(NUM_OUT_SUBMODELS):
+            targets.append(targets[0])
+            targets.append(targets[1])
+
+        return inputs, targets_modified
 
     def __next__(self):
         return self.next()
