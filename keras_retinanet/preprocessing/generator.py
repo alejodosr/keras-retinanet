@@ -277,14 +277,105 @@ class Generator(object):
         """
         # get the max image shape
         max_shape = tuple(max(image.shape[x] for image in image_group) for x in range(3))
-        anchors   = self.generate_anchors(max_shape)
+        anchors   = self.generate_anchors(max_shape) # Originally are 160956
 
-        batches = self.compute_anchor_targets(
-            anchors,
+        # Old way
+        # # This has to be understoon in order to be adapted
+        # print("Number of anchors: " + str(len(anchors)))
+        # # print("Number of anchors: " + str(len(anchors[1])))
+        # print("Number of annotations group: " + str(annotations_group))
+        #
+        # # This function returns the regression batch and the labels batch
+        # batches = self.compute_anchor_targets(
+        #     anchors,
+        #     image_group,
+        #     annotations_group,
+        #     self.num_classes()
+        # )
+        #
+        # print(len(batches))
+        # input()
+
+        multiple_anchors = [120600, 30150, 7650, 1989, 567]
+        p3_width = 100
+        p3_height = 134
+        p4_width = 50
+        p4_height = 67
+        p5_width = 25
+        p5_height = 34
+        p6_width = 13
+        p6_height = 17
+        p7_width = 7
+        p7_height = 9
+        num_anchors = 9
+
+        # This function returns the regression batch and the labels batch
+        batches_p3_reg, batches_p3_class  = self.compute_anchor_targets(
+            anchors[0:multiple_anchors[0]],
             image_group,
             annotations_group,
             self.num_classes()
         )
+
+        # # Reshape to fit new network output
+        # batches_p3_reg = batches_p3_reg.reshape((self.batch_size, p3_width, p3_height, (4 + 1) * num_anchors))
+        # batches_p3_class = batches_p3_class.reshape((self.batch_size, p3_width, p3_height, (self.num_classes() + 1) * num_anchors))
+
+        batches_p4_reg, batches_p4_class = self.compute_anchor_targets(
+            anchors[multiple_anchors[0]:multiple_anchors[0] + multiple_anchors[1]],
+            image_group,
+            annotations_group,
+            self.num_classes()
+        )
+        # # Reshape to fit new network output
+        # batches_p4_reg = batches_p4_reg.reshape((self.batch_size, p4_width, p4_height, (4 + 1) * num_anchors))
+        # batches_p4_class = batches_p4_class.reshape((self.batch_size, p4_width, p4_height, (self.num_classes() + 1) * num_anchors))
+
+        batches_p5_reg, batches_p5_class = self.compute_anchor_targets(
+            anchors[multiple_anchors[0] + multiple_anchors[1]:multiple_anchors[0] + multiple_anchors[1] + multiple_anchors[2]],
+            image_group,
+            annotations_group,
+            self.num_classes()
+        )
+
+        # # Reshape to fit new network output
+        # batches_p5_reg = batches_p5_reg.reshape((self.batch_size, p5_width, p5_height, (4 + 1) * num_anchors))
+        # batches_p5_class = batches_p5_class.reshape((self.batch_size, p5_width, p5_height, (self.num_classes() + 1) * num_anchors))
+
+        batches_p6_reg, batches_p6_class = self.compute_anchor_targets(
+            anchors[multiple_anchors[0] + multiple_anchors[1] + multiple_anchors[2]:multiple_anchors[0] + multiple_anchors[1] + multiple_anchors[2] + multiple_anchors[3]],
+            image_group,
+            annotations_group,
+            self.num_classes()
+        )
+
+        # # Reshape to fit new network output
+        # batches_p6_reg = batches_p6_reg.reshape((self.batch_size, p6_width, p6_height, (4 + 1) * num_anchors))
+        # batches_p6_class = batches_p6_class.reshape((self.batch_size, p6_width, p6_height, (self.num_classes() + 1) * num_anchors))
+
+        batches_p7_reg, batches_p7_class = self.compute_anchor_targets(
+            anchors[multiple_anchors[0] + multiple_anchors[1] + multiple_anchors[2] + multiple_anchors[3]:multiple_anchors[0] + multiple_anchors[1] + multiple_anchors[2] + multiple_anchors[3] + multiple_anchors[4]],
+            image_group,
+            annotations_group,
+            self.num_classes()
+        )
+
+        # # Reshape to fit new network output
+        # batches_p7_reg = batches_p7_reg.reshape((self.batch_size, p7_width, p7_height, (4 + 1) * num_anchors))
+        # batches_p7_class = batches_p7_class.reshape((self.batch_size, p7_width, p7_height, (self.num_classes() + 1) * num_anchors))
+
+        # print("batches_p3_reg " + str(batches_p3_reg.shape))
+        # print("batches_p3_class " + str(batches_p3_class.shape))
+        # print("batches_p4_reg " + str(batches_p4_reg.shape))
+        # print("batches_p4_class " + str(batches_p4_class.shape))
+        # print("batches_p5_reg " + str(batches_p5_reg.shape))
+        # print("batches_p5_class " + str(batches_p5_class.shape))
+        # print("batches_p6_reg " + str(batches_p6_reg.shape))
+        # print("batches_p6_class " + str(batches_p6_class.shape))
+        # print("batches_p7_reg " + str(batches_p7_reg.shape))
+        # print("batches_p7_class " + str(batches_p7_class.shape))
+
+        batches = batches_p3_reg, batches_p3_class, batches_p4_reg, batches_p4_class, batches_p5_reg, batches_p5_class, batches_p6_reg, batches_p6_class, batches_p7_reg, batches_p7_class
 
         return list(batches)
 
@@ -310,19 +401,7 @@ class Generator(object):
         # compute network targets
         targets = self.compute_targets(image_group, annotations_group)
 
-        # Debug
-        # print("inputs:" + str(inputs.shape))
-        # print("length of array: " + str(len(targets)))
-        # print("outputs: " + str(targets[0].shape))
-
-        # Modification to handle multiple outputs
-        NUM_OUT_SUBMODELS = 5
-        targets_modified = list()
-        for i in range(NUM_OUT_SUBMODELS):
-            targets.append(targets[0])
-            targets.append(targets[1])
-
-        return inputs, targets_modified
+        return inputs, targets
 
     def __next__(self):
         return self.next()

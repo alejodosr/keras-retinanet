@@ -41,10 +41,10 @@ def focal(alpha=0.25, gamma=2.0):
         Returns
             The focal loss of y_pred w.r.t. y_true.
         """
-        num_classes = 1
+
+        # Old way
         labels         = y_true[:, :, :-1]
         anchor_state   = y_true[:, :, -1]  # -1 for ignore, 0 for background, 1 for object
-        # y_pred = keras.layers.core.Reshape((-1, num_classes))(y_pred)
         classification = y_pred
 
         # filter out "ignore" anchors
@@ -91,9 +91,9 @@ def smooth_l1(sigma=3.0):
         Returns
             The smooth L1 loss of y_pred w.r.t. y_true.
         """
+
+        # Old way
         # separate target and state
-        num_values = 4
-        # y_pred = keras.layers.core.Reshape((-1, num_values))(y_pred)
         regression        = y_pred
         regression_target = y_true[:, :, :-1]
         anchor_state      = y_true[:, :, -1]
@@ -118,5 +118,6 @@ def smooth_l1(sigma=3.0):
         normalizer = keras.backend.maximum(1, keras.backend.shape(indices)[0])
         normalizer = keras.backend.cast(normalizer, dtype=keras.backend.floatx())
         return keras.backend.sum(regression_loss) / normalizer
+
 
     return _smooth_l1

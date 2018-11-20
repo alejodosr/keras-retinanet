@@ -29,15 +29,16 @@ class ResNetBackbone(Backbone):
     """ Describes backbone information and provides utility functions.
     """
 
-    def __init__(self, backbone, static_batch_size=False):
+    def __init__(self, backbone, batch_size, static_batch_size=False):
         super(ResNetBackbone, self).__init__(backbone)
         self.custom_objects.update(keras_resnet.custom_objects)
         self.static_batch_size = static_batch_size
+        self.batch_size = batch_size
 
     def retinanet(self, *args, **kwargs):
         """ Returns a retinanet model using the correct backbone.
         """
-        return resnet_retinanet(*args, backbone=self.backbone, static_batch_size=self.static_batch_size, **kwargs)
+        return resnet_retinanet(*args, backbone=self.backbone, batch_size=self.batch_size, static_batch_size=self.static_batch_size, **kwargs)
 
     def download_imagenet(self):
         """ Downloads ImageNet weights and returns path to weights file.
@@ -77,7 +78,7 @@ class ResNetBackbone(Backbone):
         return preprocess_image(inputs, mode='caffe')
 
 
-def resnet_retinanet(num_classes, backbone='resnet50', inputs=None, modifier=None, static_batch_size=False, **kwargs):
+def resnet_retinanet(num_classes, backbone='resnet50', batch_size=1, inputs=None, modifier=None, static_batch_size=False, **kwargs):
     """ Constructs a retinanet model using a resnet backbone.
 
     Args
@@ -94,13 +95,13 @@ def resnet_retinanet(num_classes, backbone='resnet50', inputs=None, modifier=Non
     if inputs is None:
         if keras.backend.image_data_format() == 'channels_first':
             if static_batch_size:
-                inputs = keras.layers.Input(batch_shape=(1, 3, 800, 1069))
+                inputs = keras.layers.Input(batch_shape=(batch_size, 3, 800, 1069))
                 # inputs = keras.layers.Input(shape=(3, 800, 1069), batch_size=1, dtype=tf.float32)
             else:
                 inputs = keras.layers.Input(shape=(3, None, None))
         else:
             if static_batch_size:
-                inputs = keras.layers.Input(batch_shape=(1, 800, 1069, 3))
+                inputs = keras.layers.Input(batch_shape=(batch_size, 800, 1069, 3))
                 # inputs = keras.layers.Input(shape=(800, 1069, 3), batch_size=1, dtype=tf.float32)
             else:
                 inputs = keras.layers.Input(shape=(None, None, 3))

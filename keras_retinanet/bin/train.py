@@ -134,48 +134,58 @@ def create_models(backbone_retinanet, num_classes, weights, multi_gpu=0, freeze_
         )
     else:
 
-        # p3_witdth = 100
-        # p3_height = 134
-        # p4_witdth = 50
-        # p4_height = 67
-        # p5_witdth = 25
-        # p5_height = 34
-        # p6_witdth = 13
-        # p6_height = 17
-        # p7_witdth = 7
-        # p7_height = 9
-        #
-        # training_model.compile(
-        #     loss={
-        #         'regression_submodel_' + str(p3_witdth) + '_' + str(p3_height): losses.smooth_l1(),
-        #         'classification_submodel_' + str(p3_witdth) + '_' + str(p3_height): losses.focal(),
-        #         'regression_submodel_' + str(p4_witdth) + '_' + str(p4_height): losses.smooth_l1(),
-        #         'classification_submodel_' + str(p4_witdth) + '_' + str(p4_height): losses.focal(),
-        #         'regression_submodel_' + str(p5_witdth) + '_' + str(p5_height): losses.smooth_l1(),
-        #         'classification_submodel_' + str(p5_witdth) + '_' + str(p5_height): losses.focal(),
-        #         'regression_submodel_' + str(p6_witdth) + '_' + str(p6_height): losses.smooth_l1(),
-        #         'classification_submodel_' + str(p6_witdth) + '_' + str(p6_height): losses.focal(),
-        #         'regression_submodel_' + str(p7_witdth) + '_' + str(p7_height): losses.smooth_l1(),
-        #         'classification_submodel_' + str(p7_witdth) + '_' + str(p7_height): losses.focal()
-        #     },
-        #     optimizer=tf.train.AdamOptimizer(learning_rate=1e-5)
-        # )
-
         training_model.compile(
             loss={
-                'pyramid_regression_100_134'    : losses.smooth_l1(),
+                'pyramid_regression_reshape_100_134'    : losses.smooth_l1(),
                 'pyramid_classification_sigmoid_100_134': losses.focal(),
-                'pyramid_regression_50_67': losses.smooth_l1(),
+                'pyramid_regression_reshape_50_67': losses.smooth_l1(),
                 'pyramid_classification_sigmoid_50_67': losses.focal(),
-                'pyramid_regression_25_34': losses.smooth_l1(),
+                'pyramid_regression_reshape_25_34': losses.smooth_l1(),
                 'pyramid_classification_sigmoid_25_34': losses.focal(),
-                'pyramid_regression_13_17': losses.smooth_l1(),
+                'pyramid_regression_reshape_13_17': losses.smooth_l1(),
                 'pyramid_classification_sigmoid_13_17': losses.focal(),
-                'pyramid_regression_7_9': losses.smooth_l1(),
+                'pyramid_regression_reshape_7_9': losses.smooth_l1(),
                 'pyramid_classification_sigmoid_7_9': losses.focal()
             },
             optimizer=tf.train.AdamOptimizer(learning_rate=1e-5)
         )
+
+        p3_width = 100
+        p3_height = 134
+        p4_width = 50
+        p4_height = 67
+        p5_width = 25
+        p5_height = 34
+        p6_width = 13
+        p6_height = 17
+        p7_width = 7
+        p7_height = 9
+
+
+        # training_model.compile(
+        #     loss={
+        #         'pyramid_regression_100_134'    : losses.smooth_l1(),
+        #         'pyramid_classification_sigmoid_100_134': losses.focal(),
+        #         'pyramid_regression_50_67': losses.smooth_l1(),
+        #         'pyramid_classification_sigmoid_50_67': losses.focal(),
+        #         'pyramid_regression_25_34': losses.smooth_l1(),
+        #         'pyramid_classification_sigmoid_25_34': losses.focal(),
+        #         'pyramid_regression_13_17': losses.smooth_l1(),
+        #         'pyramid_classification_sigmoid_13_17': losses.focal(),
+        #         'pyramid_regression_7_9': losses.smooth_l1(),
+        #         'pyramid_classification_sigmoid_7_9': losses.focal()
+        #     },
+        #     optimizer=tf.train.AdamOptimizer(learning_rate=1e-5)
+        # )
+
+        # compile model
+        # training_model.compile(
+        #     loss={
+        #         'regression'    : losses.smooth_l1(),
+        #         'classification': losses.focal()
+        #     },
+        #     optimizer=tf.train.AdamOptimizer(learning_rate=1e-5)
+        # )
 
 
     return model, training_model, prediction_model
@@ -470,7 +480,7 @@ def main(args=None):
     args = parse_args(args)
 
     # create object that stores backbone information
-    backbone = models.backbone(args.backbone, args.use_tpu)
+    backbone = models.backbone(args.backbone, args.batch_size, args.use_tpu)
 
     # make sure keras is the minimum required version
     check_keras_version()
@@ -562,6 +572,16 @@ def main(args=None):
             callbacks=callbacks,
             initial_epoch=args.initial_epoch,
         )
+
+        # # start training
+        # training_model.fit_generator(
+        #     generator=train_generator,
+        #     steps_per_epoch=args.steps,
+        #     epochs=args.epochs,
+        #     verbose=1,
+        #     callbacks=callbacks,
+        #     initial_epoch=args.initial_epoch,
+        # )
 
 
 if __name__ == '__main__':
