@@ -33,6 +33,10 @@ from PIL import Image as ImagePIL
 class image_converter:
 
     def __init__(self):
+        self.FRAME_SKIP = 0
+        self.SCALE_FACTOR = 1.0
+        self.FPS = 30.0
+        self.MAX_DELAY = 1.0 / self.FPS
         # use this environment flag to change which GPU to use
         # os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
@@ -59,13 +63,13 @@ class image_converter:
 
         # Set ros subcriber
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber("image", Image, self.callback)
+        self.image_sub = rospy.Subscriber("image", Image, self.callback, queue_size=1)
         self.bb_pub = rospy.Publisher("bb", Int16MultiArray, queue_size=1)
         self.init = False
         self.high_freq_change = True
 
         # Other variables
-        self.consecutive_drones = 0
+        self.frame_count = 0
 
         # Preliminar loading
         image_temp = read_image_bgr('/home/alejandro/py_workspace/keras-retinanet/examples/2.jpg')
@@ -86,7 +90,7 @@ class image_converter:
             # visualize detections
             for box, score, label in zip(boxes[0], scores[0], labels[0]):
                 # scores are sorted so we can break
-                if score < 0.5:
+                if score < 0.8:
                     break
 
                 print(label)
@@ -103,10 +107,19 @@ class image_converter:
         return tf.Session(config=self.config)
 
     def callback(self, data):
+        # Increase frame count
+        self.frame_count += 1
+
+        if self.FRAME_SKIP != 0:
+            self.FRAME_SKIP -= 1
+            return
+        else:
+            self.FRAME_SKIP = 5
+
         try:
             self.image = self.bridge.imgmsg_to_cv2(data, "bgr8")
             # Debug
-            draw = self.image.copy()
+            # draw = self.image.copy()
         except CvBridgeError as e:
             print(e)
 
@@ -137,13 +150,16 @@ class image_converter:
                 boxes, scores, labels = self.model.predict_on_batch(np.expand_dims(self.image, axis=0))
                 print("processing time: ", time.time() - start)
 
+                # self.FRAME_SKIP = int(self.FPS / ((time.time() - start) - self.MAX_DELAY))
+                # print(self.FRAME_SKIP)
+
                 # correct for image scale
                 boxes /= scale
 
                 # visualize detections
                 for box, score, label in zip(boxes[0], scores[0], labels[0]):
                     # scores are sorted so we can break
-                    if score < 0.5:
+                    if score < 0.65:
                         break
 
                     print(label)
@@ -155,17 +171,24 @@ class image_converter:
                             self.high_freq_change = False
 
                             bb = Int16MultiArray()
-                            bb.data = [b[0], b[1], b[2] - b[0], b[3] - b[1]]
+                            w_ext = int((b[2] - b[0]) * self.SCALE_FACTOR)
+                            h_ext =  int((b[3] - b[1]) * self.SCALE_FACTOR)
+                            bb.data = [b[0], b[1], w_ext, h_ext]
+                            # w_ext = int(b[2] - b[0])
+                            # h_ext =  int(b[3] - b[1])
+                            # OFFSET = 20
+                            # bb.data = [b[0] - OFFSET, b[1] - OFFSET, w_ext * 3, h_ext * 3]
                             self.bb_pub.publish(bb)
 
                             print(bb.data)
+                            print(self.frame_count)
 
                             # Debug
-                            color = label_color(label)
-                            draw = cv2.cvtColor(draw, cv2.COLOR_BGR2RGB)
-                            draw_box(draw, b, color=color)
-                            cv2.imshow("image", cv2.cvtColor(draw, cv2.COLOR_RGB2BGR))
-                            cv2.waitKey(0)
+                            # color = label_color(label)
+                            # draw = cv2.cvtColor(draw, cv2.COLOR_BGR2RGB)
+                            # draw_box(draw, b, color=color)
+                            # cv2.imshow("image", cv2.cvtColor(draw, cv2.COLOR_RGB2BGR))
+                            # cv2.waitKey(0)
 
 
 
