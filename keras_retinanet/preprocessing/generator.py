@@ -135,6 +135,7 @@ class Generator(object):
         """ Load annotations for all images in group.
         """
         annotations_group = [self.load_annotations(image_index) for image_index in group]
+        #print("annotations group", annotations_group)
         for annotations in annotations_group:
             assert(isinstance(annotations, dict)), '\'load_annotations\' should return a list of dictionaries, received: {}'.format(type(annotations))
             assert('labels' in annotations), '\'load_annotations\' should return a list of dictionaries that contain \'labels\' and \'bboxes\'.'

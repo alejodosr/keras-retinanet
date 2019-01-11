@@ -124,8 +124,9 @@ def create_models(backbone_retinanet, num_classes, weights, multi_gpu=0, freeze_
     # compile model
     training_model.compile(
         loss={
-            'regression'    : losses.smooth_l1(),
-            'classification': losses.focal()
+            'regression'    :  losses.smooth_l1(),
+            'classification':  losses.focal(),
+            'pose_regression': losses.smooth_l1()
         },
         optimizer=keras.optimizers.adam(lr=1e-5, clipnorm=0.001)
     )
@@ -437,6 +438,7 @@ def main(args=None):
 
     # create the generators
     train_generator, validation_generator = create_generators(args, backbone.preprocess_image)
+    #print("train generator", train_generator.image_data)
 
     # create the model
     if args.snapshot is not None:

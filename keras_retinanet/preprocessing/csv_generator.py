@@ -68,7 +68,7 @@ def _read_annotations(csv_reader, classes):
         line += 1
 
         try:
-            img_file, x1, y1, x2, y2, class_name = row[:6]
+            img_file, x1, y1, x2, y2, class_name, pose_z = row[:7]
         except ValueError:
             raise_from(ValueError('line {}: format should be \'img_file,x1,y1,x2,y2,class_name\' or \'img_file,,,,,\''.format(line)), None)
 
@@ -94,7 +94,7 @@ def _read_annotations(csv_reader, classes):
         if class_name not in classes:
             raise ValueError('line {}: unknown class name: \'{}\' (classes: {})'.format(line, class_name, classes))
 
-        result[img_file].append({'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2, 'class': class_name})
+        result[img_file].append({'x1': x1, 'x2': x2, 'y1': y1, 'y2': y2, 'class': class_name, 'pose_z': pose_z})
     return result
 
 
@@ -153,6 +153,7 @@ class CSVGenerator(Generator):
         try:
             with _open_for_csv(csv_data_file) as file:
                 self.image_data = _read_annotations(csv.reader(file, delimiter=','), self.classes)
+                #print("image data", self.image_data)
         except ValueError as e:
             raise_from(ValueError('invalid CSV annotations file: {}: {}'.format(csv_data_file, e)), None)
         self.image_names = list(self.image_data.keys())
@@ -210,15 +211,12 @@ class CSVGenerator(Generator):
         """ Load annotations for an image_index.
         """
         path        = self.image_names[image_index]
-        annotations = {'labels': np.empty((0,)), 'bboxes': np.empty((0, 4))}
+        annotations = {'labels': np.empty((0,)), 'bboxes': np.empty((0, 4)), 'pose_z': np.empty((0, 1))}
+        #print("annotations", annotations)
 
         for idx, annot in enumerate(self.image_data[path]):
+            annotations['pose_z'] = np.concatenate((annotations['pose_z'], [[float(annot['pose_z']), ]]))
             annotations['labels'] = np.concatenate((annotations['labels'], [self.name_to_label(annot['class'])]))
-            annotations['bboxes'] = np.concatenate((annotations['bboxes'], [[
-                float(annot['x1']),
-                float(annot['y1']),
-                float(annot['x2']),
-                float(annot['y2']),
-            ]]))
+            annotations['bboxes'] = np.concatenate((annotations['bboxes'], [[float(annot['x1']),float(annot['y1']),float(annot['x2']),float(annot['y2']),]]))
 
         return annotations
