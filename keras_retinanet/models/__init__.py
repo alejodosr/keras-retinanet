@@ -19,6 +19,7 @@ class Backbone(object):
             'ClipBoxes'        : layers.ClipBoxes,
             '_smooth_l1'       : losses.smooth_l1(),
             '_focal'           : losses.focal(),
+            'smooth_pose_l1'   : losses.smooth_pose_l1()
         }
 
         self.backbone = backbone
