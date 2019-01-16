@@ -111,15 +111,15 @@ def anchor_targets_bbox(
 
             # compute target class labels
             labels_batch[index, positive_indices, annotations['labels'][argmax_overlaps_inds[positive_indices]].astype(int)] = 1
-            print("labels_batch", labels_batch)
+            #print("labels_batch", labels_batch)
 
             #print("bb transform", bbox_transform(anchors, annotations['bboxes'][argmax_overlaps_inds, :]).shape)
             regression_batch[index, :, :-1] = bbox_transform(anchors, annotations['bboxes'][argmax_overlaps_inds, :])
-            print("regression batch", regression_batch.shape)
+            #print("regression batch", regression_batch.shape)
 
             #print("anotations pose_z shape", annotations['pose_z'].shape)
             pose_regression_batch[index, :, :-1] = annotations['pose_z'][argmax_overlaps_inds, :]
-            print("pose regression batch", pose_regression_batch.shape)
+            #print("pose regression batch", pose_regression_batch.shape)
 
         # ignore annotations outside of image
         if image.shape:
