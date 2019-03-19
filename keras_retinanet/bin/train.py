@@ -206,7 +206,8 @@ def create_callbacks(model, training_model, prediction_model, validation_generat
     return callbacks
 
 
-def create_generators(args, preprocess_image):
+def create_generators(
+        args, preprocess_image):
     """ Create generators for training and validation.
 
     Args
@@ -223,6 +224,7 @@ def create_generators(args, preprocess_image):
 
     # create random transform generator for augmenting training data
     if args.random_transform:
+        print("Default is random transform")
         transform_generator = random_transform_generator(
             min_rotation=-0.1,
             max_rotation=0.1,
@@ -236,6 +238,7 @@ def create_generators(args, preprocess_image):
             flip_y_chance=0.5,
         )
     else:
+        print("Default is not random transform")
         transform_generator = random_transform_generator(flip_x_chance=0.5)
 
     if args.dataset_type == 'coco':
