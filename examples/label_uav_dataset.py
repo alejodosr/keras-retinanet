@@ -33,21 +33,23 @@ ROOTDIR = "/media/alejandro/DATA/datasets/real_uav_raw_dataset"
 OUTDIR = "/media/alejandro/DATA/datasets/real_uav_dataset"
 
 if SAVE_ANNOTATIONS:
+    # Create subdirectories
+    os.mkdir(OUTDIR + '/detected', 0755)
+    os.mkdir(OUTDIR + '/not_detected', 0755)
+    os.mkdir(OUTDIR + '/data', 0755)
+    os.mkdir(OUTDIR + '/data/obj', 0755)
+
     # Store names information
-    with open(OUTDIR + '/obj.names', 'a') as the_file:
+    with open(OUTDIR + '/data/obj.names', 'a') as the_file:
         the_file.write(LABELS_TO_NAMES[0])
 
     # Store data information
-    with open(OUTDIR + '/obj.data', 'a') as the_file:
+    with open(OUTDIR + '/data/obj.data', 'a') as the_file:
         the_file.write('classes = 1\n')
         the_file.write('train  = data/train.txt\n')
         the_file.write('valid  = data/test.txt\n')
         the_file.write('names = data/obj.names\n')
         the_file.write('backup = backup/\n')
-
-    # Create subdirectories
-    os.mkdir(OUTDIR + '/detected', 0755)
-    os.mkdir(OUTDIR + '/not_detected', 0755)
 
 # use this environment flag to change which GPU to use
 #os.environ["CUDA_VISIBLE_DEVICES"] = "1"
@@ -115,10 +117,16 @@ for subdir, dirs, files in os.walk(ROOTDIR):
 
                 b = box.astype(float)
                 print(b)
-                x1 = b[0] / float(width)
-                y1 = b[1] / float(height)
-                x2 = b[2] / float(width)
-                y2 = b[3] / float(height)
+                x1 = b[0]
+                y1 = b[1]
+                x2 = b[2]
+                y2 = b[3]
+
+                bbwidth = (x2 - x1) / float(width)
+                bbheight = (y2 - y1) / float(height)
+                cx = (x1 + (bbwidth / 2.0)) / float(width)
+                cy = (y1 + (bbheight / 2.0)) / float(height)
+
 
                 if SAVE_ANNOTATIONS:
                     # Remove extension
@@ -129,8 +137,8 @@ for subdir, dirs, files in os.walk(ROOTDIR):
                     outfile = outfile.replace('.png', '')
 
                     # Store names information
-                    with open(os.path.join(OUTDIR, str(counter).zfill(6) + '_' + outfile + '.txt'), 'a') as the_file:
-                        the_file.write(str(x1) + ' ' + str(y1) + ' ' + str(x2) + ' ' + str(y2) + '\n')
+                    with open(os.path.join(OUTDIR + '/data/obj', str(counter).zfill(6) + '_' + outfile + '.txt'), 'a') as the_file:
+                        the_file.write(str(label) + ' ' + str(cx) + ' ' + str(cy) + ' ' + str(bbwidth) + ' ' + str(bbheight) + '\n')
 
                 if SHOW_IMAGES:
                     color = label_color(label)
@@ -145,9 +153,12 @@ for subdir, dirs, files in os.walk(ROOTDIR):
 
             if bb_found:
                 # Save image in dataset
-                cv2.imwrite(os.path.join(OUTDIR, str(counter).zfill(6) + '_' + file), image)
+                cv2.imwrite(os.path.join(OUTDIR + '/data/obj', str(counter).zfill(6) + '_' + file), image)
                 # Save examples
                 cv2.imwrite(os.path.join(OUTDIR + '/detected', str(counter).zfill(6) + '_' + file), draw)
+                # Store names information
+                with open(os.path.join(OUTDIR + '/data', 'train.txt'), 'a') as the_file:
+                    the_file.write(os.path.join('data/obj', str(counter).zfill(6) + '_' + file) + '\n')
             else:
                 # Save image in dataset
                 cv2.imwrite(os.path.join(OUTDIR + '/not_detected', str(counter).zfill(6) + '_' + file), image)
