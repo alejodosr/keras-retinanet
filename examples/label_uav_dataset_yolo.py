@@ -82,8 +82,11 @@ for subdir, dirs, files in os.walk(ROOTDIR):
             # Disable flag
             bb_found = False
 
-            # load image
-            image = read_image_bgr(os.path.join(subdir, file))
+            try:
+                # load image
+                image = read_image_bgr(os.path.join(subdir, file))
+            except:
+                continue
 
             # copy to draw on
             draw = image.copy()
@@ -122,10 +125,12 @@ for subdir, dirs, files in os.walk(ROOTDIR):
                 x2 = b[2]
                 y2 = b[3]
 
-                bbwidth = (x2 - x1) / float(width)
-                bbheight = (y2 - y1) / float(height)
+                bbwidth = (x2 - x1)
+                bbheight = (y2 - y1)
                 cx = (x1 + (bbwidth / 2.0)) / float(width)
                 cy = (y1 + (bbheight / 2.0)) / float(height)
+                bbwidth = (x2 - x1) / float(width)
+                bbheight = (y2 - y1) / float(height)
 
 
                 if SAVE_ANNOTATIONS:
@@ -135,12 +140,14 @@ for subdir, dirs, files in os.walk(ROOTDIR):
                     outfile = outfile.replace('.JPG', '')
                     outfile = outfile.replace('.JPEG', '')
                     outfile = outfile.replace('.png', '')
+                    outfile = outfile.replace('.GIF', '')
+                    outfile = outfile.replace('.gif', '')
 
                     # Store names information
                     with open(os.path.join(OUTDIR + '/data/obj', str(counter).zfill(6) + '_' + outfile + '.txt'), 'a') as the_file:
                         the_file.write(str(label) + ' ' + str(cx) + ' ' + str(cy) + ' ' + str(bbwidth) + ' ' + str(bbheight) + '\n')
 
-                if SHOW_IMAGES:
+                #if SHOW_IMAGES:
                     color = label_color(label)
                     color_gr = (0, 255, 255)
 
@@ -155,7 +162,8 @@ for subdir, dirs, files in os.walk(ROOTDIR):
                 # Save image in dataset
                 cv2.imwrite(os.path.join(OUTDIR + '/data/obj', str(counter).zfill(6) + '_' + file), image)
                 # Save examples
-                cv2.imwrite(os.path.join(OUTDIR + '/detected', str(counter).zfill(6) + '_' + file), draw)
+                draw_bgr = cv2.cvtColor(draw, cv2.COLOR_RGB2BGR)
+                cv2.imwrite(os.path.join(OUTDIR + '/detected', str(counter).zfill(6) + '_' + file), draw_bgr)
                 # Store names information
                 with open(os.path.join(OUTDIR + '/data', 'train.txt'), 'a') as the_file:
                     the_file.write(os.path.join('data/obj', str(counter).zfill(6) + '_' + file) + '\n')
