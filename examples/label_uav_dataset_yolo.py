@@ -31,6 +31,7 @@ SAVE_ANNOTATIONS = 1
 LABELS_TO_NAMES = {0: 'drone', 1: 'bird', 2: 'car'}
 ROOTDIR = "/media/alejandro/DATA/datasets/real_uav_raw_dataset"
 OUTDIR = "/media/alejandro/DATA/datasets/real_uav_dataset"
+PERCENTAGE_OF_VALIDATION = 0.2
 
 if SAVE_ANNOTATIONS:
     # Create subdirectories
@@ -164,9 +165,15 @@ for subdir, dirs, files in os.walk(ROOTDIR):
                 # Save examples
                 draw_bgr = cv2.cvtColor(draw, cv2.COLOR_RGB2BGR)
                 cv2.imwrite(os.path.join(OUTDIR + '/detected', str(counter).zfill(6) + '_' + file), draw_bgr)
-                # Store names information
-                with open(os.path.join(OUTDIR + '/data', 'train.txt'), 'a') as the_file:
-                    the_file.write(os.path.join('data/obj', str(counter).zfill(6) + '_' + file) + '\n')
+                if np.random.uniform(0, 1, 1)[0] > PERCENTAGE_OF_VALIDATION:
+                    # Store names information
+                    with open(os.path.join(OUTDIR + '/data', 'train.txt'), 'a') as the_file:
+                        the_file.write(os.path.join('data/obj', str(counter).zfill(6) + '_' + file) + '\n')
+                else:
+                    # Store names information
+                    with open(os.path.join(OUTDIR + '/data', 'validation.txt'), 'a') as the_file:
+                        the_file.write(os.path.join('data/obj', str(counter).zfill(6) + '_' + file) + '\n')
+
             else:
                 # Save image in dataset
                 cv2.imwrite(os.path.join(OUTDIR + '/not_detected', str(counter).zfill(6) + '_' + file), image)
